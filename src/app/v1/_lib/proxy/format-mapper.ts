@@ -67,6 +67,9 @@ export function detectFormatByEndpoint(pathname: string): ClientFormat | null {
     // OpenAI Chat Completions
     { pattern: /^\/v1\/chat\/completions$/i, format: "openai" },
 
+    // OpenAI Models List
+    { pattern: /^\/v1\/models$/i, format: "openai" },
+
     // Gemini Direct API
     {
       pattern: /^\/v1beta\/models\/[^/:]+:(?:generateContent|streamGenerateContent|countTokens)$/i,

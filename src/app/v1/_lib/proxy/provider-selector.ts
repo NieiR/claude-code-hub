@@ -713,7 +713,12 @@ export class ProxyProviderResolver {
 
       // 2c. 模型匹配（保留原有逻辑）
       if (!requestedModel) {
-        // 没有模型信息时，只选择 Anthropic 提供商（向后兼容）
+        // 没有模型信息时，根据请求格式选择匹配的供应商类型
+        // OpenAI 格式（如 /v1/models）→ 选择 openai-compatible 供应商
+        // 其他格式 → 选择 claude 供应商（向后兼容）
+        if (session?.originalFormat === "openai") {
+          return provider.providerType === "openai-compatible";
+        }
         return provider.providerType === "claude";
       }
 
