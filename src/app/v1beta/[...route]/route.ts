@@ -3,6 +3,10 @@ import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import { registerCors } from "@/app/v1/_lib/cors";
 import { handleProxyRequest } from "@/app/v1/_lib/proxy-handler";
+import {
+  handleGeminiModelDetail,
+  handleGeminiModels,
+} from "@/app/v1beta/_lib/gemini-models-handler";
 
 export const runtime = "nodejs";
 
@@ -10,6 +14,18 @@ export const runtime = "nodejs";
 const app = new Hono().basePath("/v1beta");
 
 registerCors(app);
+
+// Gemini Models API 路由（本地聚合，不转发到上游）
+app.get("/models", handleGeminiModels);
+// 匹配 /models/{model} 但不匹配 /models/{model}:action
+app.get("/models/:model", (c) => {
+  const model = c.req.param("model");
+  // 如果包含冒号，说明是 generateContent 等 action 请求，交给 proxy handler
+  if (model.includes(":")) {
+    return handleProxyRequest(c);
+  }
+  return handleGeminiModelDetail(c);
+});
 
 // 所有 Gemini API 请求都通过 proxy handler 处理
 // 格式检测会自动识别 Gemini 请求体中的 contents 字段

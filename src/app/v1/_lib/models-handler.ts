@@ -1,14 +1,16 @@
 /**
  * /v1/models 端点处理器
  *
- * 并行请求所有上游供应商的模型列表，聚合返回 OpenAI 兼容格式。
+ * 支持多种响应格式：
+ * - OpenAI 格式（默认）
+ * - Anthropic 格式（当请求包含 anthropic-version header 时）
  */
 
 import type { Context } from "hono";
+import { PROVIDER_GROUP } from "@/lib/constants/provider.constants";
 import { logger } from "@/lib/logger";
 import { validateApiKeyAndGetUser } from "@/repository/key";
 import { findAllProviders } from "@/repository/provider";
-import { PROVIDER_GROUP } from "@/lib/constants/provider.constants";
 import type { Provider } from "@/types/provider";
 
 // OpenAI Models API 响应格式
@@ -19,9 +21,64 @@ interface OpenAIModel {
   owned_by: string;
 }
 
-interface OpenAIModelsResponse {
-  object: "list";
-  data: OpenAIModel[];
+// Anthropic Models API 响应格式
+interface AnthropicModel {
+  type: "model";
+  id: string;
+  display_name: string;
+  created_at: string;
+}
+
+interface AnthropicModelsResponse {
+  data: AnthropicModel[];
+  has_more: boolean;
+  first_id: string | null;
+  last_id: string | null;
+}
+
+type ResponseFormat = "openai" | "anthropic";
+
+/**
+ * 检测请求期望的响应格式
+ */
+function detectResponseFormat(c: Context): ResponseFormat {
+  // 如果有 anthropic-version header，返回 Anthropic 格式
+  const anthropicVersion = c.req.header("anthropic-version");
+  if (anthropicVersion) {
+    return "anthropic";
+  }
+  return "openai";
+}
+
+/**
+ * 将内部模型数据转换为 Anthropic 格式
+ */
+function toAnthropicModel(model: OpenAIModel): AnthropicModel {
+  return {
+    type: "model",
+    id: model.id,
+    display_name: formatDisplayName(model.id),
+    created_at: new Date(model.created * 1000).toISOString(),
+  };
+}
+
+/**
+ * 格式化模型名称为显示名称
+ */
+function formatDisplayName(modelId: string): string {
+  // claude-sonnet-4-20250514 -> Claude Sonnet 4
+  // gpt-4o -> GPT 4o
+  // gemini-2.5-pro -> Gemini 2.5 Pro
+  return modelId
+    .replace(/-\d{8}$/, "") // 移除日期后缀
+    .split("-")
+    .map((part) => {
+      if (part.toLowerCase() === "gpt") return "GPT";
+      if (part.toLowerCase() === "claude") return "Claude";
+      if (part.toLowerCase() === "gemini") return "Gemini";
+      return part.charAt(0).toUpperCase() + part.slice(1);
+    })
+    .join(" ");
 }
 
 // 上游请求超时（毫秒）
@@ -226,6 +283,10 @@ export async function handleModels(c: Context): Promise<Response> {
     }
 
     if (enabledProviders.length === 0) {
+      const format = detectResponseFormat(c);
+      if (format === "anthropic") {
+        return c.json({ data: [], has_more: false, first_id: null, last_id: null });
+      }
       return c.json({ object: "list", data: [] });
     }
 
@@ -248,7 +309,7 @@ export async function handleModels(c: Context): Promise<Response> {
     const modelMap = new Map<string, OpenAIModel>();
     let successCount = 0;
 
-    for (const { provider, models, error } of results) {
+    for (const { models, error } of results) {
       if (!error && models.length > 0) {
         successCount++;
         for (const model of models) {
@@ -259,8 +320,9 @@ export async function handleModels(c: Context): Promise<Response> {
       }
     }
 
-    // 6. 构建响应
+    // 6. 构建响应（根据请求格式）
     const allModels = Array.from(modelMap.values()).sort((a, b) => a.id.localeCompare(b.id));
+    const format = detectResponseFormat(c);
 
     logger.info("[ModelsHandler] Models list served", {
       userId: user.id,
@@ -269,7 +331,19 @@ export async function handleModels(c: Context): Promise<Response> {
       totalProviders: enabledProviders.length,
       successfulProviders: successCount,
       totalModels: allModels.length,
+      responseFormat: format,
     });
+
+    if (format === "anthropic") {
+      const anthropicModels = allModels.map(toAnthropicModel);
+      const response: AnthropicModelsResponse = {
+        data: anthropicModels,
+        has_more: false,
+        first_id: anthropicModels.length > 0 ? anthropicModels[0].id : null,
+        last_id: anthropicModels.length > 0 ? anthropicModels[anthropicModels.length - 1].id : null,
+      };
+      return c.json(response);
+    }
 
     return c.json({
       object: "list",
@@ -370,6 +444,17 @@ export async function handleModelDetail(c: Context): Promise<Response> {
       ownedBy = "openai";
     } else if (modelId.startsWith("gemini")) {
       ownedBy = "google";
+    }
+
+    const format = detectResponseFormat(c);
+
+    if (format === "anthropic") {
+      return c.json({
+        type: "model",
+        id: modelId,
+        display_name: formatDisplayName(modelId),
+        created_at: new Date().toISOString(),
+      });
     }
 
     const model: OpenAIModel = {
