@@ -208,6 +208,9 @@ export async function createErrorRule(data: {
     })
     .returning();
 
+  // 通知 ErrorRuleDetector 重新加载缓存
+  await emitErrorRulesUpdated();
+
   return {
     id: result.id,
     pattern: result.pattern,
@@ -258,6 +261,9 @@ export async function updateErrorRule(
     return null;
   }
 
+  // 通知 ErrorRuleDetector 重新加载缓存
+  await emitErrorRulesUpdated();
+
   return {
     id: result.id,
     pattern: result.pattern,
@@ -282,6 +288,11 @@ export async function updateErrorRule(
  */
 export async function deleteErrorRule(id: number): Promise<boolean> {
   const result = await db.delete(errorRules).where(eq(errorRules.id, id)).returning();
+
+  if (result.length > 0) {
+    // 通知 ErrorRuleDetector 重新加载缓存
+    await emitErrorRulesUpdated();
+  }
 
   return result.length > 0;
 }
