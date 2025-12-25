@@ -2,6 +2,150 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Changelog (AI Context Updates)
+
+### 2025-12-24 - Auxiliary Module Documentation Complete
+- Added complete documentation for 4 auxiliary modules:
+  - **Dashboard UI** (`src/app/[locale]/dashboard/`) - User management, logs, sessions, quotas, monitoring
+  - **I18n System** (`src/i18n/`, `messages/`) - Multi-language support and translation workflow
+  - **UI Components** (`src/components/`) - Reusable component library with usage patterns
+  - **API Endpoints** (`src/app/api/`) - REST API layer and OpenAPI documentation
+- All 10 core modules now have detailed CLAUDE.md documentation
+- Updated module index with direct documentation links
+- Navigation breadcrumbs added to all module docs for easy traversal
+
+### 2025-12-24 - Comprehensive Documentation Audit
+- Verified all module-level documentation completeness
+- Confirmed 6 core modules fully documented (Proxy Core, Core Services, Actions, Database, Repository, Testing)
+- Validated cross-references and navigation breadcrumbs
+- Generated comprehensive index with file statistics and coverage metrics
+- All primary architectural components now have detailed module guides
+
+### 2025-12-23 - Initial AI Context Generation
+- Added comprehensive module structure documentation
+- Created Mermaid diagram for module visualization
+- Added detailed module index with responsibilities
+- Documented proxy pipeline, core services, and data layer
+- Established module-level documentation structure
+
+---
+
+## Project Vision
+
+Claude Code Hub is an enterprise-grade proxy service for Claude AI and compatible APIs. It provides:
+- Multi-format support (Claude, OpenAI, Codex, Gemini)
+- Multi-provider load balancing with circuit breaker
+- Fine-grained rate limiting and quota management
+- Real-time monitoring and audit trail
+- Session-aware context tracking
+- Request/response manipulation engine
+
+## Architecture Overview
+
+### Request Flow
+
+```
+Client Request (Claude/OpenAI/Codex/Gemini format)
+    ↓
+Format Detection & Normalization
+    ↓
+Guard Pipeline (Auth → Filters → Rate Limit → Provider Selection)
+    ↓
+Format Conversion (to upstream provider format)
+    ↓
+Provider Forwarding (with retry & circuit breaker)
+    ↓
+Response Handling (streaming/non-streaming)
+    ↓
+Format Conversion Back (to client format)
+    ↓
+Client Response
+```
+
+### Technology Stack
+
+- **Runtime**: Bun (fast JavaScript runtime)
+- **Framework**: Next.js 16 (App Router)
+- **Database**: PostgreSQL + Drizzle ORM
+- **Cache/Queue**: Redis + IORedis
+- **API Layer**: Hono (fast HTTP framework)
+- **Testing**: Vitest
+- **Linting**: Biome
+- **Type Checking**: TypeScript 5
+- **I18n**: next-intl (5 locales)
+
+## Module Structure
+
+```mermaid
+graph TD
+    ROOT["(Root) claude-code-hub"]
+
+    ROOT --> SRC["src/"]
+    ROOT --> TESTS["tests/"]
+    ROOT --> MSGS["messages/"]
+    ROOT --> DOCS["docs/"]
+    ROOT --> DEPLOY["deploy/"]
+    ROOT --> DRIZZLE_MIG["drizzle/"]
+
+    SRC --> APP["app/"]
+    SRC --> LIB["lib/"]
+    SRC --> ACTIONS["actions/"]
+    SRC --> DRIZZLE["drizzle/"]
+    SRC --> REPO["repository/"]
+    SRC --> COMPONENTS["components/"]
+    SRC --> I18N["i18n/"]
+
+    APP --> V1["v1/ (Proxy Core)"]
+    APP --> API["api/"]
+    APP --> DASHBOARD["[locale]/dashboard/"]
+    APP --> SETTINGS["[locale]/settings/"]
+
+    V1 --> CONVERTERS["_lib/converters/"]
+    V1 --> PROXY["_lib/proxy/"]
+    V1 --> CODEX["_lib/codex/"]
+    V1 --> GEMINI["_lib/gemini/"]
+
+    LIB --> RATE_LIMIT["rate-limit/"]
+    LIB --> REDIS["redis/"]
+    LIB --> PROVIDER_TESTING["provider-testing/"]
+    LIB --> NOTIFICATION["notification/"]
+
+    TESTS --> UNIT["unit/"]
+    TESTS --> INTEGRATION["integration/"]
+    TESTS --> E2E["e2e/"]
+    TESTS --> API_TESTS["api/"]
+
+    click V1 "./src/app/v1/CLAUDE.md" "Proxy Core Module"
+    click LIB "./src/lib/CLAUDE.md" "Core Services Module"
+    click ACTIONS "./src/actions/CLAUDE.md" "Server Actions Module"
+    click DRIZZLE "./src/drizzle/CLAUDE.md" "Database Module"
+    click REPO "./src/repository/CLAUDE.md" "Repository Module"
+    click DASHBOARD "./src/app/[locale]/dashboard/CLAUDE.md" "Dashboard UI Module"
+    click API "./src/app/api/CLAUDE.md" "API Endpoints Module"
+    click COMPONENTS "./src/components/CLAUDE.md" "UI Components Module"
+    click I18N "./src/i18n/CLAUDE.md" "I18n System Module"
+    click TESTS "./tests/CLAUDE.md" "Testing Module"
+```
+
+## Module Index
+
+| Module | Path | Responsibility | Documentation |
+|--------|------|----------------|---------------|
+| **Proxy Core** | `src/app/v1/` | Request routing, format detection/conversion, guard pipeline | [CLAUDE.md](./src/app/v1/CLAUDE.md) |
+| **Core Services** | `src/lib/` | Session manager, circuit breaker, rate limiter, Redis, logger | [CLAUDE.md](./src/lib/CLAUDE.md) |
+| **Server Actions** | `src/actions/` | 39 business logic actions for dashboard and API | [CLAUDE.md](./src/actions/CLAUDE.md) |
+| **Database Schema** | `src/drizzle/` | Drizzle ORM schema and migrations | [CLAUDE.md](./src/drizzle/CLAUDE.md) |
+| **Repository Layer** | `src/repository/` | Data access abstraction over Drizzle | [CLAUDE.md](./src/repository/CLAUDE.md) |
+| **Testing** | `tests/` | Unit, integration, e2e, and API tests | [CLAUDE.md](./tests/CLAUDE.md) |
+| **Dashboard UI** | `src/app/[locale]/dashboard/` | Admin dashboard pages and components | [CLAUDE.md](./src/app/[locale]/dashboard/CLAUDE.md) |
+| **API Endpoints** | `src/app/api/` | REST API endpoints (admin, auth, availability, etc.) | [CLAUDE.md](./src/app/api/CLAUDE.md) |
+| **UI Components** | `src/components/` | Shared React components (shadcn/ui based) | [CLAUDE.md](./src/components/CLAUDE.md) |
+| **I18n** | `src/i18n/`, `messages/` | Internationalization routing and message files | [CLAUDE.md](./src/i18n/CLAUDE.md) |
+| **Settings UI** | `src/app/[locale]/settings/` | System settings pages | (Inline documentation) |
+| **Documentation** | `docs/` | Architecture, PRD, API guides | (Self-documenting) |
+| **Deployment** | `deploy/`, `docker-compose.yaml` | Docker configs and deployment scripts | (Config files) |
+| **Migrations** | `drizzle/` | Database migration SQL files | (SQL files) |
+
 ## Common Commands
 
 ```bash
@@ -19,7 +163,17 @@ bun run db:migrate             # Apply migrations
 bun run db:studio              # Drizzle Studio GUI
 ```
 
-## Architecture
+### Docker Build & Push
+
+Private registry: `registry.deephub.cc/claude-code-hub`
+
+```bash
+# Build and push
+docker build -f deploy/Dockerfile -t registry.deephub.cc/claude-code-hub:latest .
+docker push registry.deephub.cc/claude-code-hub:latest
+```
+
+## Architecture Details
 
 ### Proxy Request Pipeline (`src/app/v1/_lib/`)
 
@@ -80,36 +234,99 @@ Repository pattern in `src/repository/` wraps Drizzle queries.
 - Swagger UI: `/api/actions/docs`
 - Scalar UI: `/api/actions/scalar`
 
+## Development Workflow
+
+### Running Locally
+
+1. Copy `.env.example` to `.env.local` and configure:
+   ```bash
+   DSN=postgresql://user:pass@localhost:5432/claude_hub
+   REDIS_URL=redis://localhost:6379
+   ADMIN_TOKEN=your-secure-token
+   ```
+
+2. Start dependencies (PostgreSQL + Redis):
+   ```bash
+   docker-compose up -d
+   ```
+
+3. Run migrations:
+   ```bash
+   bun run db:migrate
+   ```
+
+4. Start dev server:
+   ```bash
+   bun run dev
+   ```
+
+5. Access:
+   - Dashboard: http://localhost:13500/dashboard
+   - API Docs: http://localhost:13500/api/actions/docs
+
+### Testing Strategy
+
+- **Unit tests** (`tests/unit/`): Core logic without external dependencies
+- **Integration tests** (`tests/integration/`): Database + Redis interactions
+- **API tests** (`tests/api/`): Server Actions validation
+- **E2E tests** (`tests/e2e/`): Complete user flows
+
+Run tests:
+```bash
+bun run test              # Unit tests only (fast)
+bun run test:ui           # Interactive UI
+bun run test:coverage     # With coverage report
+```
+
 ## Code Style
 
 - Biome: 2-space indent, double quotes, trailing commas, 100 char max line
 - Path alias: `@/*` -> `./src/*`
 - Icons: Use `lucide-react`, no custom SVGs
 - UI components in `src/components/ui/` (excluded from typecheck)
-
-## Testing
-
-Vitest configuration in `vitest.config.ts`:
-- Environment: Node
-- Coverage thresholds: 50% lines/functions, 40% branches
-- Integration tests requiring DB are in `tests/integration/` (excluded by default)
-- Test database must contain 'test' in name for safety
+- Strict mode enabled, no `any` types
+- Server-only code marked with `"server-only"` import
 
 ## I18n
 
 5 locales via next-intl: `en`, `ja`, `ru`, `zh-CN`, `zh-TW`
 - Messages: `messages/{locale}/*.json`
 - Routing: `src/i18n/`
+- All user-facing text must be internationalized
 
-## Environment
+## Environment Variables
 
 See `.env.example` for all variables. Critical ones:
 - `ADMIN_TOKEN` - Dashboard login (must change from default)
 - `DSN` - PostgreSQL connection string
 - `REDIS_URL` - Redis for rate limiting and sessions
-- `AUTO_MIGRATE` - Run Drizzle migrations on startup
+- `AUTO_MIGRATE` - Run Drizzle migrations on startup (default: false)
+- `SESSION_TTL` - Session cache TTL in seconds (default: 300)
+- `LOG_LEVEL` - Logging level: trace, debug, info, warn, error (default: info)
+
+## AI Development Guidelines
+
+When working with this codebase:
+
+1. **Read Before Write**: Always read existing files before modifying them
+2. **Follow Patterns**: Use existing patterns for similar features (e.g., repository pattern, action structure)
+3. **Type Safety**: Maintain strict TypeScript types, no `any`
+4. **Error Handling**: Use ProxyError classes with proper error codes
+5. **Logging**: Use structured logging via `logger` from `@/lib/logger`
+6. **Redis Keys**: Follow naming convention in `src/lib/redis/`
+7. **Database Changes**: Always generate migrations via `bun run db:generate`
+8. **Testing**: Add tests for new features, maintain coverage thresholds
+9. **I18n**: Add translations for all 5 locales when adding UI text
+10. **Documentation**: Update module CLAUDE.md when changing architecture
 
 ## Contributing
 
 See `CONTRIBUTING.md` for branch naming, commit format, and PR process.
 All PRs target `dev` branch; `main` is release-only.
+
+## Related Documentation
+
+- [Architecture Overview](./docs/architecture-claude-code-hub-2025-11-29.md)
+- [PRD Document](./docs/prd-claude-code-hub-2025-11-29.md)
+- [API Authentication Guide](./docs/api-authentication-guide.md)
+- [Agent Workflows](./AGENTS.md)
