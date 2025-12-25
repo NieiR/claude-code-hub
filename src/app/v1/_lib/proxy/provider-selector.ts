@@ -199,6 +199,8 @@ function checkFormatProviderTypeCompatibility(
       return providerType === "codex";
     case "openai":
       return providerType === "openai-compatible";
+    case "embedding":
+      return providerType === "openai-compatible"; // Embeddings 只兼容 OpenAI Compatible 供应商
     case "gemini":
       return providerType === "gemini";
     case "gemini-cli":
@@ -626,6 +628,7 @@ export class ProxyProviderResolver {
         case "response":
           return "codex";
         case "openai":
+        case "embedding":
           return "openai-compatible";
         case "gemini":
           return "gemini";

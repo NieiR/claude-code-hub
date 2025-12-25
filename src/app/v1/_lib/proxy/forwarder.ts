@@ -46,6 +46,7 @@ const STANDARD_ENDPOINTS = [
   "/v1/messages/count_tokens",
   "/v1/responses",
   "/v1/chat/completions",
+  "/v1/embeddings",
   "/v1/models",
 ];
 

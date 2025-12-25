@@ -26,7 +26,7 @@ import type { Format } from "../converters/types";
  * - "gemini": 检测到 Gemini API 直接格式的请求（通过 `contents` 字段）
  * - "gemini-cli": 检测到 Gemini CLI 格式的请求（通过 `request` envelope）
  */
-export type ClientFormat = "response" | "openai" | "claude" | "gemini" | "gemini-cli";
+export type ClientFormat = "response" | "openai" | "claude" | "gemini" | "gemini-cli" | "embedding";
 
 /**
  * 根据请求端点检测客户端格式（优先级最高）
@@ -67,6 +67,9 @@ export function detectFormatByEndpoint(pathname: string): ClientFormat | null {
     // OpenAI Chat Completions
     { pattern: /^\/v1\/chat\/completions$/i, format: "openai" },
 
+    // OpenAI Embeddings API
+    { pattern: /^\/v1\/embeddings$/i, format: "embedding" },
+
     // Gemini Direct API
     {
       pattern: /^\/v1beta\/models\/[^/:]+:(?:generateContent|streamGenerateContent|countTokens)$/i,
@@ -101,6 +104,8 @@ export function mapClientFormatToTransformer(clientFormat: ClientFormat): Format
       return "codex";
     case "openai":
       return "openai-compatible";
+    case "embedding":
+      return "openai-compatible"; // Embeddings 直接透传到 OpenAI Compatible 供应商
     case "claude":
       return "claude";
     case "gemini":
