@@ -121,22 +121,30 @@ function checkProviderGroupMatch(providerGroupTag: string | null, userGroups: st
 }
 
 /**
- * 根据供应商类型推断 owned_by 字段
+ * 根据模型 ID 推断 owned_by 字段
+ *
+ * 使用关键词匹配（非仅前缀），处理上游供应商重命名的情况
+ * 例如：gemini-claude-opus-4-5-thinking 应识别为 anthropic
+ *
+ * 优先级：具体模型名 > 厂商前缀
  */
-function getOwnedBy(providerType: string): string {
-  switch (providerType) {
-    case "claude":
-    case "claude-auth":
-      return "anthropic";
-    case "openai-compatible":
-    case "codex":
-      return "openai";
-    case "gemini":
-    case "gemini-cli":
-      return "google";
-    default:
-      return "system";
-  }
+function inferOwnedByFromModelId(modelId: string): string {
+  const id = modelId.toLowerCase();
+
+  // 优先匹配具体模型系列（处理重命名/别名情况）
+  if (id.includes("claude") || id.includes("anthropic")) return "anthropic";
+  if (id.includes("gpt-") || id.includes("chatgpt")) return "openai";
+
+  // OpenAI 推理模型系列（o1/o3/o4 需要更精确匹配避免误判）
+  if (/\bo[134]-/.test(id) || /\bo[134]$/.test(id)) return "openai";
+
+  // 其他厂商
+  if (id.includes("gemini")) return "google";
+  if (id.includes("mistral") || id.includes("codestral")) return "mistralai";
+  if (id.includes("deepseek")) return "deepseek";
+  if (id.includes("qwen")) return "alibaba";
+
+  return "system";
 }
 
 /**
@@ -156,12 +164,13 @@ function buildModelsUrl(provider: Provider): string {
 
 /**
  * 从单个供应商获取模型列表
+ *
+ * 注意：返回的模型暂不设置 owned_by，由聚合阶段统一推断
  */
 async function fetchModelsFromProvider(
   provider: Provider
 ): Promise<{ models: OpenAIModel[]; error?: string }> {
   const url = buildModelsUrl(provider);
-  const ownedBy = getOwnedBy(provider.providerType);
 
   try {
     const controller = new AbortController();
@@ -193,7 +202,7 @@ async function fetchModelsFromProvider(
         id: m.id,
         object: "model" as const,
         created: m.created || Math.floor(Date.now() / 1000),
-        owned_by: ownedBy,
+        owned_by: "", // 由聚合阶段统一推断
       }));
       return { models };
     }
@@ -204,7 +213,7 @@ async function fetchModelsFromProvider(
         id: m.id || m.name || "unknown",
         object: "model" as const,
         created: Math.floor(Date.now() / 1000),
-        owned_by: ownedBy,
+        owned_by: "", // 由聚合阶段统一推断
       }));
       return { models };
     }
@@ -305,7 +314,7 @@ export async function handleModels(c: Context): Promise<Response> {
       })
     );
 
-    // 5. 聚合所有模型（去重）
+    // 5. 聚合所有模型（按 model.id 去重，统一推断 owned_by）
     const modelMap = new Map<string, OpenAIModel>();
     let successCount = 0;
 
@@ -314,7 +323,10 @@ export async function handleModels(c: Context): Promise<Response> {
         successCount++;
         for (const model of models) {
           if (!modelMap.has(model.id)) {
-            modelMap.set(model.id, model);
+            modelMap.set(model.id, {
+              ...model,
+              owned_by: inferOwnedByFromModelId(model.id),
+            });
           }
         }
       }
@@ -435,16 +447,8 @@ export async function handleModelDetail(c: Context): Promise<Response> {
       );
     }
 
-    // 3. 查找模型（从任意供应商）
-    // 简化实现：返回固定格式，owned_by 根据模型名推断
-    let ownedBy = "system";
-    if (modelId.startsWith("claude")) {
-      ownedBy = "anthropic";
-    } else if (modelId.startsWith("gpt") || modelId.startsWith("o1") || modelId.startsWith("o3")) {
-      ownedBy = "openai";
-    } else if (modelId.startsWith("gemini")) {
-      ownedBy = "google";
-    }
+    // 3. 返回模型详情（owned_by 由模型名推断）
+    const ownedBy = inferOwnedByFromModelId(modelId);
 
     const format = detectResponseFormat(c);
 
