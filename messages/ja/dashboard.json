@@ -1016,7 +1016,29 @@
       "manual": "手動プローブ",
       "auto": "自動プローブ",
       "probeSuccess": "プローブ成功",
-      "probeFailed": "プローブ失敗"
+      "probeFailed": "プローブ失敗",
+      "groupByType": {
+        "claude": "Claude エンドポイント",
+        "claudeAuth": "Claude Auth エンドポイント",
+        "gemini": "Gemini エンドポイント",
+        "geminiCli": "Gemini CLI エンドポイント",
+        "codex": "Codex エンドポイント",
+        "openaiCompatible": "OpenAI 互換エンドポイント"
+      },
+      "tooltip": {
+        "noData": "プローブデータなし",
+        "source": "ソース",
+        "runtime": "ランタイム"
+      },
+      "legend": {
+        "success": "成功",
+        "failure": "失敗",
+        "noData": "データなし"
+      }
+    },
+    "tabs": {
+      "providerAvailability": "プロバイダー可用性",
+      "endpointProbes": "エンドポイントプローブ履歴"
     },
     "toast": {
       "refreshSuccess": "可用性データを更新しました",

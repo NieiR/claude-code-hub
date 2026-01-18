@@ -44,14 +44,16 @@ export {
   getDistinctProviderGroups,
   updateProvider,
 } from "./provider";
-
+export type { ProviderEndpointWithVendor } from "./provider-endpoints";
 export {
   createProviderEndpoint,
   deleteProviderEndpointProbeLogsBeforeDateBatch,
   deleteProviderVendor,
+  findAllProviderEndpointsWithVendorInfo,
   findEnabledProviderEndpointsForProbing,
   findProviderEndpointById,
   findProviderEndpointProbeLogs,
+  findProviderEndpointProbeLogsBatch,
   findProviderEndpointsByVendorAndType,
   findProviderVendorById,
   findProviderVendors,

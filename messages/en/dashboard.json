@@ -1040,7 +1040,29 @@
       "manual": "Manual Probe",
       "auto": "Auto Probe",
       "probeSuccess": "Probe successful",
-      "probeFailed": "Probe failed"
+      "probeFailed": "Probe failed",
+      "groupByType": {
+        "claude": "Claude Endpoints",
+        "claudeAuth": "Claude Auth Endpoints",
+        "gemini": "Gemini Endpoints",
+        "geminiCli": "Gemini CLI Endpoints",
+        "codex": "Codex Endpoints",
+        "openaiCompatible": "OpenAI Compatible Endpoints"
+      },
+      "tooltip": {
+        "noData": "No probe data",
+        "source": "Source",
+        "runtime": "Runtime"
+      },
+      "legend": {
+        "success": "Success",
+        "failure": "Failure",
+        "noData": "No Data"
+      }
+    },
+    "tabs": {
+      "providerAvailability": "Provider Availability",
+      "endpointProbes": "Endpoint Probe History"
     },
     "toast": {
       "refreshSuccess": "Availability data refreshed",

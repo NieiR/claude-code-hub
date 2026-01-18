@@ -1016,7 +1016,29 @@
       "manual": "手動探測",
       "auto": "自動探測",
       "probeSuccess": "探測成功",
-      "probeFailed": "探測失敗"
+      "probeFailed": "探測失敗",
+      "groupByType": {
+        "claude": "Claude 端點",
+        "claudeAuth": "Claude Auth 端點",
+        "gemini": "Gemini 端點",
+        "geminiCli": "Gemini CLI 端點",
+        "codex": "Codex 端點",
+        "openaiCompatible": "OpenAI 相容端點"
+      },
+      "tooltip": {
+        "noData": "無探測資料",
+        "source": "來源",
+        "runtime": "執行階段"
+      },
+      "legend": {
+        "success": "成功",
+        "failure": "失敗",
+        "noData": "無資料"
+      }
+    },
+    "tabs": {
+      "providerAvailability": "供應商可用性",
+      "endpointProbes": "端點探測歷史"
     },
     "toast": {
       "refreshSuccess": "可用性資料已重新整理",

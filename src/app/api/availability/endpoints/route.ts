@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { findProviderEndpointsByVendorAndType } from "@/repository";
+import {
+  findAllProviderEndpointsWithVendorInfo,
+  findProviderEndpointsByVendorAndType,
+} from "@/repository";
 import type { ProviderType } from "@/types/provider";
 
 const PROVIDER_TYPES: ProviderType[] = [
@@ -28,8 +31,21 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
   const vendorIdRaw = searchParams.get("vendorId");
-  const vendorId = vendorIdRaw ? Number.parseInt(vendorIdRaw, 10) : Number.NaN;
   const providerTypeRaw = searchParams.get("providerType");
+
+  // If no filters provided, return all endpoints with vendor info
+  if (!vendorIdRaw && !providerTypeRaw) {
+    try {
+      const endpoints = await findAllProviderEndpointsWithVendorInfo();
+      return NextResponse.json({ endpoints });
+    } catch (error) {
+      console.error("Endpoint availability API error:", error);
+      return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    }
+  }
+
+  // Original filtered query
+  const vendorId = vendorIdRaw ? Number.parseInt(vendorIdRaw, 10) : Number.NaN;
 
   if (!Number.isFinite(vendorId) || vendorId <= 0 || !isProviderType(providerTypeRaw)) {
     return NextResponse.json({ error: "Invalid query" }, { status: 400 });

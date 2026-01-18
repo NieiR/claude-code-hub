@@ -1018,7 +1018,29 @@
       "manual": "Ручная проверка",
       "auto": "Автоматическая проверка",
       "probeSuccess": "Проверка успешна",
-      "probeFailed": "Проверка не удалась"
+      "probeFailed": "Проверка не удалась",
+      "groupByType": {
+        "claude": "Claude эндпоинты",
+        "claudeAuth": "Claude Auth эндпоинты",
+        "gemini": "Gemini эндпоинты",
+        "geminiCli": "Gemini CLI эндпоинты",
+        "codex": "Codex эндпоинты",
+        "openaiCompatible": "OpenAI-совместимые эндпоинты"
+      },
+      "tooltip": {
+        "noData": "Нет данных проверки",
+        "source": "Источник",
+        "runtime": "Время выполнения"
+      },
+      "legend": {
+        "success": "Успех",
+        "failure": "Ошибка",
+        "noData": "Нет данных"
+      }
+    },
+    "tabs": {
+      "providerAvailability": "Доступность провайдеров",
+      "endpointProbes": "История проверок эндпоинтов"
     },
     "toast": {
       "refreshSuccess": "Данные о доступности обновлены",

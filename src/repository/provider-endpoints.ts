@@ -743,3 +743,131 @@ export async function findProviderEndpointProbeLogs(
 
   return rows.map(toProviderEndpointProbeLog);
 }
+
+/**
+ * Extended endpoint type that includes vendor information
+ */
+export interface ProviderEndpointWithVendor extends ProviderEndpoint {
+  vendor: {
+    id: number;
+    websiteDomain: string;
+    displayName: string | null;
+  };
+}
+
+/**
+ * Find all enabled provider endpoints with their vendor info
+ * Returns endpoints grouped by provider type
+ */
+export async function findAllProviderEndpointsWithVendorInfo(): Promise<
+  ProviderEndpointWithVendor[]
+> {
+  const rows = await db
+    .select({
+      id: providerEndpoints.id,
+      vendorId: providerEndpoints.vendorId,
+      providerType: providerEndpoints.providerType,
+      url: providerEndpoints.url,
+      label: providerEndpoints.label,
+      sortOrder: providerEndpoints.sortOrder,
+      isEnabled: providerEndpoints.isEnabled,
+      lastProbedAt: providerEndpoints.lastProbedAt,
+      lastProbeOk: providerEndpoints.lastProbeOk,
+      lastProbeStatusCode: providerEndpoints.lastProbeStatusCode,
+      lastProbeLatencyMs: providerEndpoints.lastProbeLatencyMs,
+      lastProbeErrorType: providerEndpoints.lastProbeErrorType,
+      lastProbeErrorMessage: providerEndpoints.lastProbeErrorMessage,
+      createdAt: providerEndpoints.createdAt,
+      updatedAt: providerEndpoints.updatedAt,
+      deletedAt: providerEndpoints.deletedAt,
+      vendorWebsiteDomain: providerVendors.websiteDomain,
+      vendorDisplayName: providerVendors.displayName,
+    })
+    .from(providerEndpoints)
+    .innerJoin(providerVendors, eq(providerEndpoints.vendorId, providerVendors.id))
+    .where(isNull(providerEndpoints.deletedAt))
+    .orderBy(
+      asc(providerEndpoints.providerType),
+      asc(providerEndpoints.sortOrder),
+      asc(providerEndpoints.id)
+    );
+
+  return rows.map((row) => ({
+    ...toProviderEndpoint(row),
+    vendor: {
+      id: row.vendorId,
+      websiteDomain: row.vendorWebsiteDomain,
+      displayName: row.vendorDisplayName ?? null,
+    },
+  }));
+}
+
+/**
+ * Batch fetch probe logs for multiple endpoints
+ * Returns a map of endpoint ID to probe logs
+ */
+export async function findProviderEndpointProbeLogsBatch(
+  endpointIds: number[],
+  limitPerEndpoint: number = 30
+): Promise<Map<number, ProviderEndpointProbeLog[]>> {
+  if (endpointIds.length === 0) {
+    return new Map();
+  }
+
+  // Use a window function to get top N logs per endpoint
+  const rows = await db.execute<{
+    id: number;
+    endpoint_id: number;
+    source: ProviderEndpointProbeSource;
+    ok: boolean;
+    status_code: number | null;
+    latency_ms: number | null;
+    error_type: string | null;
+    error_message: string | null;
+    created_at: Date;
+  }>(sql`
+    WITH ranked_logs AS (
+      SELECT
+        id,
+        endpoint_id,
+        source,
+        ok,
+        status_code,
+        latency_ms,
+        error_type,
+        error_message,
+        created_at,
+        ROW_NUMBER() OVER (PARTITION BY endpoint_id ORDER BY created_at DESC) as rn
+      FROM provider_endpoint_probe_logs
+      WHERE endpoint_id = ANY(${endpointIds})
+    )
+    SELECT id, endpoint_id, source, ok, status_code, latency_ms, error_type, error_message, created_at FROM ranked_logs
+    WHERE rn <= ${limitPerEndpoint}
+    ORDER BY endpoint_id, created_at DESC
+  `);
+
+  const result = new Map<number, ProviderEndpointProbeLog[]>();
+
+  // Initialize empty arrays for all requested endpoint IDs
+  for (const id of endpointIds) {
+    result.set(id, []);
+  }
+
+  // Group logs by endpoint ID
+  for (const row of rows) {
+    const log = toProviderEndpointProbeLog({
+      id: row.id,
+      endpointId: row.endpoint_id,
+      source: row.source,
+      ok: row.ok,
+      statusCode: row.status_code,
+      latencyMs: row.latency_ms,
+      errorType: row.error_type,
+      errorMessage: row.error_message,
+      createdAt: row.created_at,
+    });
+    result.get(row.endpoint_id)?.push(log);
+  }
+
+  return result;
+}
