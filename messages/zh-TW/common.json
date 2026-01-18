@@ -48,5 +48,13 @@
   "theme": "主題",
   "light": "淺色",
   "dark": "深色",
-  "system": "跟隨系統"
+  "system": "跟隨系統",
+  "enabled": "啟用",
+  "disabled": "停用",
+  "none": "無",
+  "minimal": "極簡",
+  "low": "低",
+  "medium": "中",
+  "high": "高",
+  "xhigh": "極高"
 }

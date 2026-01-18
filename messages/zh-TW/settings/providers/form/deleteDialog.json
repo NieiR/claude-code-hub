@@ -2,5 +2,6 @@
   "cancel": "關閉",
   "confirm": "確認刪除",
   "description": "確定要刪除供應商「{name}」嗎？此操作不可復原。",
-  "title": "刪除供應商"
+  "title": "刪除供應商",
+  "confirmShort": "確定要刪除此供應商嗎？"
 }

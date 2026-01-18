@@ -40,6 +40,7 @@ import providersFormProxyTest from "./providers/form/proxyTest.json";
 import providersFormSections from "./providers/form/sections.json";
 import providersFormStrings from "./providers/form/strings.json";
 import providersFormSuccess from "./providers/form/success.json";
+import providersFormTabs from "./providers/form/tabs.json";
 import providersFormTitle from "./providers/form/title.json";
 import providersFormUrl from "./providers/form/url.json";
 import providersFormUrlPreview from "./providers/form/urlPreview.json";
@@ -62,6 +63,7 @@ const providersForm = {
   proxyTest: providersFormProxyTest,
   sections: providersFormSections,
   success: providersFormSuccess,
+  tabs: providersFormTabs,
   title: providersFormTitle,
   url: providersFormUrl,
   urlPreview: providersFormUrlPreview,

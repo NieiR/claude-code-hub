@@ -1,8 +1,11 @@
 {
+  "addFailed": "新增服务商失败",
+  "deleteFailed": "删除服务商失败",
+  "groupTagTooLong": "分组标签总长度不能超过 {max} 个字符",
   "invalidUrl": "请输入有效的 API 地址",
   "invalidWebsiteUrl": "请输入有效的供应商官网地址",
-  "groupTagTooLong": "分组标签总长度不能超过 {max} 个字符",
-  "addFailed": "添加服务商失败",
   "updateFailed": "更新服务商失败",
-  "deleteFailed": "删除服务商失败"
+  "nameRequired": "服务商名称不能为空",
+  "keyRequired": "API 密钥不能为空",
+  "unexpected": "发生未知错误，请稍后重试"
 }

@@ -37,7 +37,7 @@ import type { CurrencyCode } from "@/lib/utils/currency";
 import { formatCurrency } from "@/lib/utils/currency";
 import type { ProviderDisplay } from "@/types/provider";
 import type { User } from "@/types/user";
-import { ProviderForm } from "./forms/provider-form";
+import { ProviderFormV2 } from "./forms/v2/provider-form-v2";
 import { useProviderEdit } from "./hooks/use-provider-edit";
 
 interface ProviderListItemProps {
@@ -280,7 +280,7 @@ export function ProviderListItem({
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
                     <FormErrorBoundary>
-                      <ProviderForm
+                      <ProviderFormV2
                         mode="edit"
                         provider={item}
                         enableMultiProviderTypes={enableMultiProviderTypes}
@@ -308,7 +308,7 @@ export function ProviderListItem({
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
                     <FormErrorBoundary>
-                      <ProviderForm
+                      <ProviderFormV2
                         mode="create"
                         cloneProvider={item}
                         enableMultiProviderTypes={enableMultiProviderTypes}

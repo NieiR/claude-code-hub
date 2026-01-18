@@ -7,7 +7,7 @@ import { useState } from "react";
 import { FormErrorBoundary } from "@/components/form-error-boundary";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ProviderForm } from "./forms/provider-form";
+import { ProviderFormV2 } from "./forms/v2/provider-form-v2";
 
 interface AddProviderDialogProps {
   enableMultiProviderTypes: boolean;
@@ -25,9 +25,9 @@ export function AddProviderDialog({ enableMultiProviderTypes }: AddProviderDialo
           <ServerCog className="h-4 w-4" /> {t("addProvider")}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-full sm:max-w-5xl lg:max-w-6xl max-h-[90vh] flex flex-col">
+      <DialogContent className="max-w-full sm:max-w-5xl lg:max-w-6xl h-[90vh] p-0 flex flex-col overflow-hidden">
         <FormErrorBoundary>
-          <ProviderForm
+          <ProviderFormV2
             mode="create"
             enableMultiProviderTypes={enableMultiProviderTypes}
             onSuccess={() => {

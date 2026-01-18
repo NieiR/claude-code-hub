@@ -1,4 +1,6 @@
 {
-  "created": "新增供應商成功",
-  "createdDesc": "供應商「{name}」已新增"
+  "created": "供應商新增成功",
+  "createdDesc": "供應商「{name}」已新增",
+  "updated": "供應商更新成功",
+  "deleted": "供應商刪除成功"
 }

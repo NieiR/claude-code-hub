@@ -1,0 +1,8 @@
+{
+  "general": "General",
+  "routing": "Models & Routing",
+  "limits": "Limits & Cost",
+  "resilience": "Resilience",
+  "advanced": "Advanced",
+  "test": "Connectivity"
+}

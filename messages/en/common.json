@@ -48,5 +48,13 @@
   "theme": "Theme",
   "light": "Light",
   "dark": "Dark",
-  "system": "System"
+  "system": "System",
+  "enabled": "Enabled",
+  "disabled": "Disabled",
+  "none": "None",
+  "minimal": "Minimal",
+  "low": "Low",
+  "medium": "Medium",
+  "high": "High",
+  "xhigh": "Extra High"
 }

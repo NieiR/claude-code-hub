@@ -4,5 +4,8 @@
   "groupTagTooLong": "分組標籤總長度不能超過 {max} 個字元",
   "invalidUrl": "請輸入有效的 API 位址",
   "invalidWebsiteUrl": "請輸入有效的供應商官網",
-  "updateFailed": "更新供應商失敗"
+  "updateFailed": "更新供應商失敗",
+  "nameRequired": "供應商名稱不能為空",
+  "keyRequired": "API 金鑰不能為空",
+  "unexpected": "發生未知錯誤，請稍後再試"
 }

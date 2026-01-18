@@ -1,4 +1,12 @@
 {
+  "advanced": {
+    "cache": {
+      "title": "Cache Settings"
+    },
+    "codex": {
+      "title": "Codex Overrides"
+    }
+  },
   "apiTest": {
     "desc": "Validate whether the selected provider type and model respond correctly. Defaults to the routing configuration unless overridden.",
     "summary": "Verify provider & model connectivity",
@@ -8,9 +16,9 @@
   "circuitBreaker": {
     "desc": "Automatically break on consecutive failures to protect overall service quality",
     "failureThreshold": {
-      "desc": "Number of consecutive failures to trigger break",
+      "desc": "Number of consecutive failures to trigger break. 0 means disabled (no circuit breaker)",
       "label": "Failure Threshold",
-      "placeholder": "5"
+      "placeholder": "0"
     },
     "maxRetryAttempts": {
       "desc": "Total tries (including the first call) before switching providers. Leave empty to use the system default.",
@@ -86,6 +94,16 @@
       "none": "Disabled"
     },
     "title": "MCP Passthrough Configuration",
+    "type": {
+      "label": "Passthrough Type",
+      "none": "Disabled",
+      "minimax": "Minimax",
+      "glm": "GLM",
+      "custom": "Custom"
+    },
+    "url": {
+      "label": "MCP Passthrough URL"
+    },
     "urlAuto": "Auto-extracted: {url}",
     "urlDesc": "MCP service base URL. Leave empty to auto-extract from provider URL",
     "urlLabel": "MCP Passthrough URL",
@@ -115,6 +133,7 @@
     }
   },
   "rateLimit": {
+    "desc": "Configure spend quotas and concurrency limits for this provider.",
     "dailyResetMode": {
       "desc": {
         "fixed": "Reset quota at a fixed time each day",
@@ -225,11 +244,6 @@
         "forceEnable": "Force Enable (for supported models)",
         "inherit": "Inherit (follow client request)"
       }
-    },
-    "joinClaudePool": {
-      "desc": "When enabled, this provider will participate in load balancing with Claude-type providers",
-      "help": "Available only when there is a redirect mapping to claude-* models. When users request claude-* models, this provider also joins scheduling.",
-      "label": "Join Claude Routing Pool"
     },
     "modelRedirects": {
       "label": "Model Redirects",

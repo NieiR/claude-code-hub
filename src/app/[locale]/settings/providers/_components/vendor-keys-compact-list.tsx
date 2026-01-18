@@ -44,7 +44,7 @@ import { copyToClipboard, isClipboardSupported } from "@/lib/utils/clipboard";
 import { type CurrencyCode, formatCurrency } from "@/lib/utils/currency";
 import type { ProviderDisplay, ProviderStatisticsMap, ProviderType } from "@/types/provider";
 import type { User } from "@/types/user";
-import { ProviderForm } from "./forms/provider-form";
+import { ProviderFormV2 } from "./forms/v2/provider-form-v2";
 import { InlineEditPopover } from "./inline-edit-popover";
 
 function buildDefaultProviderName(input: {
@@ -102,7 +102,7 @@ export function VendorKeysCompactList(props: {
             </DialogTrigger>
             <DialogContent className="max-w-full sm:max-w-5xl lg:max-w-6xl max-h-[90vh] flex flex-col">
               <FormErrorBoundary>
-                <ProviderForm
+                <ProviderFormV2
                   mode="create"
                   enableMultiProviderTypes={props.enableMultiProviderTypes}
                   hideUrl
@@ -461,7 +461,7 @@ function VendorKeyRow(props: {
                 </DialogTrigger>
                 <DialogContent className="max-w-full sm:max-w-5xl lg:max-w-6xl max-h-[90vh] flex flex-col">
                   <FormErrorBoundary>
-                    <ProviderForm
+                    <ProviderFormV2
                       mode="edit"
                       provider={props.provider}
                       enableMultiProviderTypes={props.enableMultiProviderTypes}

@@ -52,7 +52,7 @@ import type { CurrencyCode } from "@/lib/utils/currency";
 import { formatCurrency } from "@/lib/utils/currency";
 import type { ProviderDisplay, ProviderStatistics } from "@/types/provider";
 import type { User } from "@/types/user";
-import { ProviderForm } from "./forms/provider-form";
+import { ProviderFormV2 } from "./forms/v2/provider-form-v2";
 import { InlineEditPopover } from "./inline-edit-popover";
 
 interface ProviderRichListItemProps {
@@ -671,9 +671,9 @@ export function ProviderRichListItem({
 
       {/* 编辑 Dialog */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-6xl h-[90vh] p-0 flex flex-col overflow-hidden">
           <FormErrorBoundary>
-            <ProviderForm
+            <ProviderFormV2
               mode="edit"
               provider={provider}
               onSuccess={() => {
@@ -690,9 +690,9 @@ export function ProviderRichListItem({
 
       {/* 克隆 Dialog */}
       <Dialog open={openClone} onOpenChange={setOpenClone}>
-        <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-6xl h-[90vh] p-0 flex flex-col overflow-hidden">
           <FormErrorBoundary>
-            <ProviderForm
+            <ProviderFormV2
               mode="create"
               cloneProvider={provider}
               onSuccess={() => {

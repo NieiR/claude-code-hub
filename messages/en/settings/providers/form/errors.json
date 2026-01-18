@@ -4,5 +4,8 @@
   "groupTagTooLong": "Provider group tags are too long (max {max} chars total)",
   "invalidUrl": "Please enter a valid API address",
   "invalidWebsiteUrl": "Please enter a valid provider website URL",
-  "updateFailed": "Failed to update provider"
+  "updateFailed": "Failed to update provider",
+  "nameRequired": "Provider name is required",
+  "keyRequired": "API key is required",
+  "unexpected": "Something went wrong. Please try again."
 }

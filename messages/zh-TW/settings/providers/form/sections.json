@@ -1,4 +1,12 @@
 {
+  "advanced": {
+    "cache": {
+      "title": "快取設定"
+    },
+    "codex": {
+      "title": "Codex 覆寫"
+    }
+  },
   "apiTest": {
     "desc": "測試供應商模型是否可用，預設與路由設定中選擇的供應商類型保持一致。",
     "summary": "驗證供應商與模型連通性",
@@ -8,9 +16,9 @@
   "circuitBreaker": {
     "desc": "連續失敗時自動熔斷，避免影響整體服務品質",
     "failureThreshold": {
-      "desc": "連續失敗多少次後觸發熔斷",
+      "desc": "連續失敗多少次後觸發熔斷，0 表示不啟用熔斷",
       "label": "失敗閾值（次）",
-      "placeholder": "5"
+      "placeholder": "0"
     },
     "maxRetryAttempts": {
       "desc": "包含首次呼叫在內，單一供應商最多嘗試次數，超過即切換。留空使用系統預設值。",
@@ -86,6 +94,16 @@
       "none": "不啟用"
     },
     "title": "MCP 透傳配置",
+    "type": {
+      "label": "透傳類型",
+      "none": "不啟用",
+      "minimax": "Minimax",
+      "glm": "智譜 GLM",
+      "custom": "自定義"
+    },
+    "url": {
+      "label": "MCP 透傳 URL"
+    },
     "urlAuto": "自動提取: {url}",
     "urlDesc": "MCP 服務的基礎 URL。留空則自動從提供商 URL 提取基礎域名",
     "urlLabel": "MCP 透傳 URL",
@@ -115,6 +133,7 @@
     }
   },
   "rateLimit": {
+    "desc": "為此供應商設定費用額度與並發工作階段限制。",
     "dailyResetMode": {
       "desc": {
         "fixed": "每天固定時間點重置額度",
@@ -225,11 +244,6 @@
         "forceEnable": "強制啟用",
         "inherit": "跟隨客戶端"
       }
-    },
-    "joinClaudePool": {
-      "desc": "啟用後，此供應商將與 Claude 類型供應商共同參與負載均衡",
-      "help": "僅當存在映射至 claude-* 的規則時可用。當用戶請求 claude-* 模型時，此供應商也會被納入調度。",
-      "label": "加入 Claude 調度池"
     },
     "modelRedirects": {
       "label": "模型重定向設定",

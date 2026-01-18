@@ -1,4 +1,12 @@
 {
+  "advanced": {
+    "cache": {
+      "title": "キャッシュ設定"
+    },
+    "codex": {
+      "title": "Codex オーバーライド"
+    }
+  },
   "apiTest": {
     "desc": "プロバイダーのモデルが利用可能かをテストします。既定ではルーティング設定で選択したプロバイダー種別に従います。",
     "summary": "プロバイダーとモデルの接続性を確認",
@@ -8,9 +16,9 @@
   "circuitBreaker": {
     "desc": "連続失敗時に自動的にブレークして全体の品質を保護します",
     "failureThreshold": {
-      "desc": "何回連続失敗でブレークするか",
+      "desc": "何回連続失敗でブレークするか。0 の場合はサーキットブレーカー無効",
       "label": "失敗しきい値（回）",
-      "placeholder": "5"
+      "placeholder": "0"
     },
     "maxRetryAttempts": {
       "desc": "初回呼び出しを含め、同一プロバイダーで試行する上限。超えると他のプロバイダーへ切り替えます。未入力の場合はデフォルト値を使用。",
@@ -86,6 +94,16 @@
       "none": "無効"
     },
     "title": "MCP パススルー設定",
+    "type": {
+      "label": "パススルータイプ",
+      "none": "無効",
+      "minimax": "Minimax",
+      "glm": "GLM",
+      "custom": "カスタム"
+    },
+    "url": {
+      "label": "MCP パススルー URL"
+    },
     "urlAuto": "自動抽出: {url}",
     "urlDesc": "MCP サービスベース URL。空のままにすると、プロバイダー URL から自動的に抽出されます",
     "urlLabel": "MCP パススルー URL",
@@ -115,6 +133,7 @@
     }
   },
   "rateLimit": {
+    "desc": "このプロバイダーの支出上限と同時セッション上限を設定します。",
     "dailyResetMode": {
       "desc": {
         "fixed": "毎日決まった時刻にクォータをリセット",
@@ -225,11 +244,6 @@
         "forceEnable": "強制有効化",
         "inherit": "継承（クライアントに従う）"
       }
-    },
-    "joinClaudePool": {
-      "desc": "有効にすると、Claude 系のプロバイダーと共に負荷分散に参加します",
-      "help": "claude-* へのリダイレクトがある場合のみ利用できます。ユーザーが claude-* モデルを要求した際に本プロバイダーも選択対象になります。",
-      "label": "Claude ルーティングプールに参加"
     },
     "modelRedirects": {
       "label": "モデルリダイレクト設定",

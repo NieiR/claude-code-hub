@@ -1,4 +1,6 @@
 {
-  "created": "添加服务商成功",
-  "createdDesc": "服务商 \"{name}\" 已添加"
+  "created": "服务商添加成功",
+  "createdDesc": "服务商 \"{name}\" 已添加",
+  "updated": "服务商更新成功",
+  "deleted": "服务商删除成功"
 }
