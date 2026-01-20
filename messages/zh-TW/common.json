@@ -58,5 +58,13 @@
     "weeksAgo": "{count}週前",
     "monthsAgo": "{count}月前",
     "yearsAgo": "{count}年前"
-  }
+  },
+  "enabled": "啟用",
+  "disabled": "停用",
+  "none": "無",
+  "minimal": "極簡",
+  "low": "低",
+  "medium": "中",
+  "high": "高",
+  "xhigh": "極高"
 }

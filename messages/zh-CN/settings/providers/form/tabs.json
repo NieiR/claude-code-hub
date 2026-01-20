@@ -1,0 +1,8 @@
+{
+  "general": "常规设置",
+  "routing": "模型与路由",
+  "limits": "限额与成本",
+  "resilience": "弹性与熔断",
+  "advanced": "高级设置",
+  "test": "连通性测试"
+}

@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type {
   AvailabilityQueryResult,
@@ -21,6 +22,7 @@ import type {
   TimeBucketMetrics,
 } from "@/lib/availability";
 import { cn } from "@/lib/utils";
+import { EndpointProbeHistory } from "./endpoint-probe-history";
 
 type TimeRangeOption = "15min" | "1h" | "6h" | "24h" | "7d";
 type SortOption = "availability" | "name" | "requests";
@@ -112,6 +114,7 @@ export function AvailabilityView() {
   const [timeRange, setTimeRange] = useState<TimeRangeOption>("24h");
   const [sortBy, setSortBy] = useState<SortOption>("availability");
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState("providers");
 
   const fetchData = useCallback(async () => {
     try {
@@ -207,17 +210,13 @@ export function AvailabilityView() {
   const getStatusBadge = (status: string) => {
     const statusKey = status as "green" | "red" | "unknown";
 
-    // 采用与请求日志相同的配色方案
     const getStatusClassName = () => {
       switch (status) {
         case "green":
-          // 成功 - 绿色
           return "bg-green-100 text-green-700 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-700";
         case "red":
-          // 错误 - 红色
           return "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-700";
         default:
-          // 未知 - 灰色
           return "bg-gray-100 text-gray-700 border-gray-300 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600";
       }
     };
@@ -344,186 +343,205 @@ export function AvailabilityView() {
           </Card>
         </div>
 
-        {/* Controls */}
-        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-            <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRangeOption)}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder={t("timeRange.label")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="15min">{t("timeRange.last15min")}</SelectItem>
-                <SelectItem value="1h">{t("timeRange.last1h")}</SelectItem>
-                <SelectItem value="6h">{t("timeRange.last6h")}</SelectItem>
-                <SelectItem value="24h">{t("timeRange.last24h")}</SelectItem>
-                <SelectItem value="7d">{t("timeRange.last7d")}</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-              <SelectTrigger className="w-full sm:w-[160px]">
-                <SelectValue placeholder={t("sort.label")} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="availability">{t("sort.availability")}</SelectItem>
-                <SelectItem value="name">{t("sort.name")}</SelectItem>
-                <SelectItem value="requests">{t("sort.requests")}</SelectItem>
-              </SelectContent>
-            </Select>
-            {data && (
-              <span className="text-sm text-muted-foreground">
-                {t("heatmap.bucketSize")}: {data.bucketSizeMinutes} {t("heatmap.minutes")}
-              </span>
-            )}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchData}
-            disabled={refreshing}
-            className="w-full sm:w-auto"
-          >
-            <RefreshCw className={cn("h-4 w-4 mr-2", refreshing && "animate-spin")} />
-            {refreshing ? t("actions.refreshing") : t("actions.refresh")}
-          </Button>
-        </div>
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="providers">{t("tabs.providerAvailability")}</TabsTrigger>
+            <TabsTrigger value="endpoints">{t("tabs.endpointProbes")}</TabsTrigger>
+          </TabsList>
 
-        {/* Heatmap */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("chart.title")}</CardTitle>
-            <CardDescription>{t("chart.description")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {!sortedProviders.length ? (
-              <div className="text-center text-muted-foreground py-8">
-                {t("states.noProviders")}
+          {/* Provider Availability Tab */}
+          <TabsContent value="providers" className="space-y-6 mt-6">
+            {/* Controls */}
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
+                <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRangeOption)}>
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder={t("timeRange.label")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15min">{t("timeRange.last15min")}</SelectItem>
+                    <SelectItem value="1h">{t("timeRange.last1h")}</SelectItem>
+                    <SelectItem value="6h">{t("timeRange.last6h")}</SelectItem>
+                    <SelectItem value="24h">{t("timeRange.last24h")}</SelectItem>
+                    <SelectItem value="7d">{t("timeRange.last7d")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                  <SelectTrigger className="w-full sm:w-[160px]">
+                    <SelectValue placeholder={t("sort.label")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="availability">{t("sort.availability")}</SelectItem>
+                    <SelectItem value="name">{t("sort.name")}</SelectItem>
+                    <SelectItem value="requests">{t("sort.requests")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                {data && (
+                  <span className="text-sm text-muted-foreground">
+                    {t("heatmap.bucketSize")}: {data.bucketSizeMinutes} {t("heatmap.minutes")}
+                  </span>
+                )}
               </div>
-            ) : (
-              <div className="space-y-3">
-                {/* Provider rows with heatmap */}
-                {sortedProviders.map((provider) => (
-                  <div
-                    key={provider.providerId}
-                    className="flex flex-col sm:flex-row sm:items-center gap-3"
-                  >
-                    {/* Provider name and summary - on same row for mobile */}
-                    <div className="flex items-center justify-between sm:contents">
-                      <div className="w-auto sm:w-32 md:w-40 shrink-0 flex items-center gap-2">
-                        <span
-                          className="font-medium truncate text-sm"
-                          title={provider.providerName}
-                        >
-                          {provider.providerName}
-                        </span>
-                        {getStatusBadge(provider.currentStatus)}
-                      </div>
-
-                      {/* Summary stats - shown on right for mobile, at end for desktop */}
-                      <div className="w-auto sm:w-20 md:w-24 lg:w-28 shrink-0 text-right text-sm sm:order-last">
-                        <div className="font-mono">
-                          {provider.currentStatus === "unknown"
-                            ? t("heatmap.noData")
-                            : formatPercentage(provider.currentAvailability)}
-                        </div>
-                        <div className="text-muted-foreground text-xs">
-                          {provider.totalRequests > 0
-                            ? `${provider.totalRequests.toLocaleString()} ${t("heatmap.requests")}`
-                            : t("heatmap.noRequests")}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Heatmap cells - wrappable grid with auto-fill */}
-                    <div className="w-full sm:flex-1 sm:min-w-0">
-                      <div className="grid gap-1 grid-cols-[repeat(auto-fill,minmax(12px,1fr))] sm:gap-px">
-                        {unifiedBuckets.map((bucketStart) => {
-                          const bucket = getBucketData(provider, bucketStart);
-                          const hasData = bucket !== null && bucket.totalRequests > 0;
-                          const score = hasData ? bucket.availabilityScore : 0;
-
-                          return (
-                            <Tooltip key={bucketStart}>
-                              <TooltipTrigger asChild>
-                                <div
-                                  className={cn(
-                                    "h-6 rounded-[2px] cursor-pointer transition-opacity hover:opacity-80",
-                                    getAvailabilityColor(score, hasData)
-                                  )}
-                                />
-                              </TooltipTrigger>
-                              <TooltipContent side="top" className="max-w-xs">
-                                <div className="text-sm space-y-1">
-                                  <div className="font-medium">
-                                    {formatBucketTime(bucketStart, data?.bucketSizeMinutes ?? 5)}
-                                  </div>
-                                  {hasData && bucket ? (
-                                    <>
-                                      <div>
-                                        {t("heatmap.requests")}: {bucket.totalRequests}
-                                      </div>
-                                      <div>
-                                        {t("columns.availability")}:{" "}
-                                        {formatPercentage(bucket.availabilityScore)}
-                                      </div>
-                                      <div>
-                                        {t("columns.avgLatency")}:{" "}
-                                        {formatLatency(bucket.avgLatencyMs)}
-                                      </div>
-                                      <div className="flex gap-2 text-xs">
-                                        <span className="text-green-500">
-                                          {t("details.greenCount")}: {bucket.greenCount}
-                                        </span>
-                                        <span className="text-red-500">
-                                          {t("details.redCount")}: {bucket.redCount}
-                                        </span>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    <div className="text-muted-foreground">
-                                      {t("heatmap.noData")}
-                                    </div>
-                                  )}
-                                </div>
-                              </TooltipContent>
-                            </Tooltip>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Legend */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-wrap gap-3 sm:gap-4 md:gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-sm bg-green-500" />
-                <span className="text-muted-foreground">{t("legend.green")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-sm bg-lime-500" />
-                <span className="text-muted-foreground">{t("legend.lime")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-sm bg-orange-500" />
-                <span className="text-muted-foreground">{t("legend.orange")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-sm bg-red-500" />
-                <span className="text-muted-foreground">{t("legend.red")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-sm bg-slate-300 dark:bg-slate-600" />
-                <span className="text-muted-foreground">{t("legend.noData")}</span>
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={fetchData}
+                disabled={refreshing}
+                className="w-full sm:w-auto"
+              >
+                <RefreshCw className={cn("h-4 w-4 mr-2", refreshing && "animate-spin")} />
+                {refreshing ? t("actions.refreshing") : t("actions.refresh")}
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Heatmap */}
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("chart.title")}</CardTitle>
+                <CardDescription>{t("chart.description")}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {!sortedProviders.length ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    {t("states.noProviders")}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {/* Provider rows with heatmap */}
+                    {sortedProviders.map((provider) => (
+                      <div
+                        key={provider.providerId}
+                        className="flex flex-col sm:flex-row sm:items-center gap-3"
+                      >
+                        {/* Provider name and summary - on same row for mobile */}
+                        <div className="flex items-center justify-between sm:contents">
+                          <div className="w-auto sm:w-32 md:w-40 shrink-0 flex items-center gap-2">
+                            <span
+                              className="font-medium truncate text-sm"
+                              title={provider.providerName}
+                            >
+                              {provider.providerName}
+                            </span>
+                            {getStatusBadge(provider.currentStatus)}
+                          </div>
+
+                          {/* Summary stats - shown on right for mobile, at end for desktop */}
+                          <div className="w-auto sm:w-20 md:w-24 lg:w-28 shrink-0 text-right text-sm sm:order-last">
+                            <div className="font-mono">
+                              {provider.currentStatus === "unknown"
+                                ? t("heatmap.noData")
+                                : formatPercentage(provider.currentAvailability)}
+                            </div>
+                            <div className="text-muted-foreground text-xs">
+                              {provider.totalRequests > 0
+                                ? `${provider.totalRequests.toLocaleString()} ${t("heatmap.requests")}`
+                                : t("heatmap.noRequests")}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Heatmap cells - wrappable grid with auto-fill */}
+                        <div className="w-full sm:flex-1 sm:min-w-0">
+                          <div className="grid gap-1 grid-cols-[repeat(auto-fill,minmax(12px,1fr))] sm:gap-px">
+                            {unifiedBuckets.map((bucketStart) => {
+                              const bucket = getBucketData(provider, bucketStart);
+                              const hasData = bucket !== null && bucket.totalRequests > 0;
+                              const score = hasData ? bucket.availabilityScore : 0;
+
+                              return (
+                                <Tooltip key={bucketStart}>
+                                  <TooltipTrigger asChild>
+                                    <div
+                                      className={cn(
+                                        "h-6 rounded-[2px] cursor-pointer transition-opacity hover:opacity-80",
+                                        getAvailabilityColor(score, hasData)
+                                      )}
+                                    />
+                                  </TooltipTrigger>
+                                  <TooltipContent side="top" className="max-w-xs">
+                                    <div className="text-sm space-y-1">
+                                      <div className="font-medium">
+                                        {formatBucketTime(
+                                          bucketStart,
+                                          data?.bucketSizeMinutes ?? 5
+                                        )}
+                                      </div>
+                                      {hasData && bucket ? (
+                                        <>
+                                          <div>
+                                            {t("heatmap.requests")}: {bucket.totalRequests}
+                                          </div>
+                                          <div>
+                                            {t("columns.availability")}:{" "}
+                                            {formatPercentage(bucket.availabilityScore)}
+                                          </div>
+                                          <div>
+                                            {t("columns.avgLatency")}:{" "}
+                                            {formatLatency(bucket.avgLatencyMs)}
+                                          </div>
+                                          <div className="flex gap-2 text-xs">
+                                            <span className="text-green-500">
+                                              {t("details.greenCount")}: {bucket.greenCount}
+                                            </span>
+                                            <span className="text-red-500">
+                                              {t("details.redCount")}: {bucket.redCount}
+                                            </span>
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <div className="text-muted-foreground">
+                                          {t("heatmap.noData")}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </TooltipContent>
+                                </Tooltip>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Legend */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-wrap gap-3 sm:gap-4 md:gap-6 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-sm bg-green-500" />
+                    <span className="text-muted-foreground">{t("legend.green")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-sm bg-lime-500" />
+                    <span className="text-muted-foreground">{t("legend.lime")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-sm bg-orange-500" />
+                    <span className="text-muted-foreground">{t("legend.orange")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-sm bg-red-500" />
+                    <span className="text-muted-foreground">{t("legend.red")}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 rounded-sm bg-slate-300 dark:bg-slate-600" />
+                    <span className="text-muted-foreground">{t("legend.noData")}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Endpoint Probe History Tab */}
+          <TabsContent value="endpoints" className="mt-6">
+            <EndpointProbeHistory />
+          </TabsContent>
+        </Tabs>
       </div>
     </TooltipProvider>
   );

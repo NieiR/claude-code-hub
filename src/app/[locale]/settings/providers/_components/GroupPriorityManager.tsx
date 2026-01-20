@@ -116,7 +116,7 @@ export function GroupPriorityManager({
                     type="number"
                     value={rule.priority}
                     onChange={(e) =>
-                      updateRule(rule.group, rule.group, parseInt(e.target.value) || 0)
+                      updateRule(rule.group, rule.group, parseInt(e.target.value, 10) || 0)
                     }
                     className="w-full sm:w-[100px] h-9 bg-background/50 focus:bg-background transition-colors text-right font-mono"
                     placeholder="优先级"

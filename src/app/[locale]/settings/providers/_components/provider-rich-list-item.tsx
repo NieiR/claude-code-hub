@@ -53,7 +53,7 @@ import type { CurrencyCode } from "@/lib/utils/currency";
 import { formatCurrency } from "@/lib/utils/currency";
 import type { ProviderDisplay, ProviderStatistics } from "@/types/provider";
 import type { User } from "@/types/user";
-import { ProviderForm } from "./forms/provider-form";
+import { ProviderFormV2 } from "./forms/v2/provider-form-v2";
 import { GroupTagsEditor } from "./group-tags-editor";
 import { InlineEditPopover } from "./inline-edit-popover";
 import { PriorityCell } from "./PriorityCell";
@@ -194,6 +194,7 @@ export function ProviderRichListItem({
             });
             queryClient.invalidateQueries({ queryKey: ["providers"] });
             queryClient.invalidateQueries({ queryKey: ["providers-health"] });
+            queryClient.invalidateQueries({ queryKey: ["provider-vendors"] });
             router.refresh();
           } else {
             toast.error(tList("deleteFailed"), {
@@ -779,9 +780,9 @@ export function ProviderRichListItem({
 
       {/* 编辑 Dialog */}
       <Dialog open={openEdit} onOpenChange={setOpenEdit}>
-        <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-6xl h-[90vh] p-0 flex flex-col overflow-hidden">
           <FormErrorBoundary>
-            <ProviderForm
+            <ProviderFormV2
               mode="edit"
               provider={provider}
               onSuccess={() => {
@@ -798,9 +799,9 @@ export function ProviderRichListItem({
 
       {/* 克隆 Dialog */}
       <Dialog open={openClone} onOpenChange={setOpenClone}>
-        <DialogContent className="max-w-6xl max-h-[90vh] flex flex-col">
+        <DialogContent className="max-w-6xl h-[90vh] p-0 flex flex-col overflow-hidden">
           <FormErrorBoundary>
-            <ProviderForm
+            <ProviderFormV2
               mode="create"
               cloneProvider={provider}
               onSuccess={() => {

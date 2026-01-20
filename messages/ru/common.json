@@ -58,5 +58,13 @@
     "weeksAgo": "{count}н назад",
     "monthsAgo": "{count}мес назад",
     "yearsAgo": "{count}г назад"
-  }
+  },
+  "enabled": "Включено",
+  "disabled": "Отключено",
+  "none": "Нет",
+  "minimal": "Минимальный",
+  "low": "Низкий",
+  "medium": "Средний",
+  "high": "Высокий",
+  "xhigh": "Очень высокий"
 }

@@ -8,7 +8,7 @@ import { createRoot } from "react-dom/client";
 import { NextIntlClientProvider } from "next-intl";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Dialog } from "@/components/ui/dialog";
-import { ProviderForm } from "@/app/[locale]/settings/providers/_components/forms/provider-form";
+import { ProviderFormV2 } from "@/app/[locale]/settings/providers/_components/forms/v2/provider-form-v2";
 import enMessages from "../../../../messages/en";
 
 const sonnerMocks = vi.hoisted(() => ({
@@ -116,6 +116,7 @@ describe("ProviderForm: 编辑时应支持提交总消费上限(limit_total_usd)
       costMultiplier: 1,
       groupTag: null,
       providerType: "claude",
+      providerVendorId: 1,
       preserveClientIp: false,
       modelRedirects: null,
       allowedModels: null,
@@ -129,6 +130,7 @@ describe("ProviderForm: 编辑时应支持提交总消费上限(limit_total_usd)
       dailyResetTime: "00:00",
       limitWeeklyUsd: null,
       limitMonthlyUsd: null,
+      limitTotalUsd: null,
       limitConcurrentSessions: 0,
       maxRetryAttempts: null,
       circuitBreakerFailureThreshold: 5,
@@ -143,28 +145,44 @@ describe("ProviderForm: 编辑时应支持提交总消费上限(limit_total_usd)
       faviconUrl: null,
       cacheTtlPreference: null,
       context1mPreference: null,
+      codexReasoningEffortPreference: null,
+      codexReasoningSummaryPreference: null,
+      codexTextVerbosityPreference: null,
+      codexParallelToolCallsPreference: null,
       tpm: null,
       rpm: null,
       rpd: null,
       cc: null,
       createdAt: "2026-01-04",
       updatedAt: "2026-01-04",
-    } as any;
+    };
 
     const { unmount } = render(
       <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
         <Dialog open onOpenChange={() => {}}>
-          <ProviderForm mode="edit" provider={provider} enableMultiProviderTypes />
+          <ProviderFormV2 mode="edit" provider={provider} enableMultiProviderTypes />
         </Dialog>
       </NextIntlClientProvider>
     );
 
-    // 等待 useEffect 从 localStorage 打开折叠区域
+    // 等待 Tabs 渲染
     await act(async () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
-    const totalInput = document.getElementById("edit-limit-total") as HTMLInputElement | null;
+    // 切换到 Limits 标签页
+    const limitsTab = document.getElementById("provider-form-tab-limits") as HTMLElement | null;
+    expect(limitsTab).toBeTruthy();
+    await act(async () => {
+      limitsTab?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      limitsTab?.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+      limitsTab?.click();
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    const totalInput = document.getElementById("limitTotalUsd") as HTMLInputElement | null;
     expect(totalInput).toBeTruthy();
 
     await act(async () => {
@@ -201,33 +219,7 @@ describe("ProviderForm: 编辑时应支持提交总消费上限(limit_total_usd)
 describe("ProviderForm: 新增成功后应重置总消费上限输入", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-
-    const storage = (() => {
-      let store: Record<string, string> = {};
-      return {
-        getItem: (key: string) => (Object.hasOwn(store, key) ? store[key] : null),
-        setItem: (key: string, value: string) => {
-          store[key] = String(value);
-        },
-        removeItem: (key: string) => {
-          delete store[key];
-        },
-        clear: () => {
-          store = {};
-        },
-        key: (index: number) => Object.keys(store)[index] ?? null,
-        get length() {
-          return Object.keys(store).length;
-        },
-      };
-    })();
-
-    Object.defineProperty(globalThis, "localStorage", {
-      value: storage,
-      configurable: true,
-    });
-
-    storage.setItem("provider-form-sections", JSON.stringify({ rateLimit: true }));
+    // No local storage needed for V2 tabs
   });
 
   test("提交新增后应清空 limit_total_usd，避免连续添加沿用上一次输入", async () => {
@@ -236,7 +228,7 @@ describe("ProviderForm: 新增成功后应重置总消费上限输入", () => {
     const { unmount } = render(
       <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
         <Dialog open onOpenChange={() => {}}>
-          <ProviderForm mode="create" enableMultiProviderTypes />
+          <ProviderFormV2 mode="create" enableMultiProviderTypes />
         </Dialog>
       </NextIntlClientProvider>
     );
@@ -245,8 +237,10 @@ describe("ProviderForm: 新增成功后应重置总消费上限输入", () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
+    // V2 default tab is 'general'
     const nameInput = document.getElementById("name") as HTMLInputElement | null;
     const urlInput = document.getElementById("url") as HTMLInputElement | null;
+    // key is on general tab
     const keyInput = document.getElementById("key") as HTMLInputElement | null;
     expect(nameInput).toBeTruthy();
     expect(urlInput).toBeTruthy();
@@ -267,7 +261,19 @@ describe("ProviderForm: 新增成功后应重置总消费上限输入", () => {
       keyInput.dispatchEvent(new Event("change", { bubbles: true }));
     });
 
-    const totalInput = document.getElementById("limit-total") as HTMLInputElement | null;
+    // Switch to limits tab
+    const limitsTab = document.getElementById("provider-form-tab-limits") as HTMLElement | null;
+    expect(limitsTab).toBeTruthy();
+    await act(async () => {
+      limitsTab?.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      limitsTab?.dispatchEvent(new MouseEvent("mouseup", { bubbles: true }));
+      limitsTab?.click();
+    });
+    await act(async () => {
+      await new Promise((r) => setTimeout(r, 0));
+    });
+
+    const totalInput = document.getElementById("limitTotalUsd") as HTMLInputElement | null;
     expect(totalInput).toBeTruthy();
 
     await act(async () => {
@@ -279,7 +285,7 @@ describe("ProviderForm: 新增成功后应重置总消费上限输入", () => {
 
     const form = document.body.querySelector("form") as HTMLFormElement | null;
     expect(form).toBeTruthy();
-
+    // ...
     await act(async () => {
       form?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     });
@@ -300,10 +306,10 @@ describe("ProviderForm: 新增成功后应重置总消费上限输入", () => {
       await new Promise((r) => setTimeout(r, 0));
     });
 
-    // 成功后应清空输入（state -> null -> input value 变为空字符串）
-    expect((document.getElementById("limit-total") as HTMLInputElement | null)?.value ?? null).toBe(
-      ""
-    );
+    // 成功后应清空输入
+    expect(
+      (document.getElementById("limitTotalUsd") as HTMLInputElement | null)?.value ?? null
+    ).toBe("");
 
     unmount();
   });

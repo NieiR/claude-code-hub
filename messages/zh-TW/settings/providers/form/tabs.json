@@ -1,0 +1,8 @@
+{
+  "general": "一般",
+  "routing": "模型與路由",
+  "limits": "限額與成本",
+  "resilience": "穩定性",
+  "advanced": "進階",
+  "test": "連通性"
+}

@@ -110,7 +110,7 @@ export function GroupTagsEditor({
             maxTags={20}
             disabled={saving}
             onInvalidTag={(tag, reason) => {
-              const messages: Record<string, string> = {
+              const _messages: Record<string, string> = {
                 empty: "标签不能为空",
                 duplicate: "标签重复",
                 too_long: `标签长度不能超过 50 字符`,

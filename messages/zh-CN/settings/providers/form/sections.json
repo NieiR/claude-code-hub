@@ -1,4 +1,12 @@
 {
+  "advanced": {
+    "cache": {
+      "title": "缓存设置"
+    },
+    "codex": {
+      "title": "Codex 覆写"
+    }
+  },
   "routing": {
     "title": "路由配置",
     "summary": {
@@ -16,11 +24,6 @@
     "modelRedirects": {
       "label": "模型重定向配置",
       "optional": "(可选)"
-    },
-    "joinClaudePool": {
-      "label": "加入 Claude 调度池",
-      "desc": "启用后，此供应商将与 Claude 类型供应商一起参与负载均衡调度",
-      "help": "仅当模型重定向配置中存在映射到 claude-* 模型时可用。启用后，当用户请求 claude-* 模型时，此供应商也会参与调度选择。"
     },
     "preserveClientIp": {
       "label": "透传客户端 IP",
@@ -122,6 +125,7 @@
     }
   },
   "rateLimit": {
+    "desc": "为该服务商配置费用额度与并发会话限制。",
     "title": "限流配置",
     "summary": {
       "fiveHour": "5h: {amount}",
@@ -177,8 +181,8 @@
     "desc": "供应商连续失败时自动熔断，避免影响整体服务质量",
     "failureThreshold": {
       "label": "失败阈值（次）",
-      "placeholder": "5",
-      "desc": "连续失败多少次后触发熔断"
+      "placeholder": "0",
+      "desc": "连续失败多少次后触发熔断，0 表示不启用熔断"
     },
     "openDuration": {
       "label": "熔断时长（分钟）",
@@ -305,6 +309,16 @@
       "placeholder": "选择透传类型"
     },
     "hint": "提示: MCP 透传功能允许 Claude Code 客户端使用第三方 AI 服务商提供的工具能力（如图片识别、联网搜索）",
+    "type": {
+      "label": "透传类型",
+      "none": "不启用",
+      "minimax": "Minimax",
+      "glm": "智谱 GLM",
+      "custom": "自定义"
+    },
+    "url": {
+      "label": "MCP 透传 URL"
+    },
     "urlLabel": "MCP 透传 URL",
     "urlPlaceholder": "https://api.minimaxi.com",
     "urlDesc": "MCP 服务的基础 URL。留空则自动从提供商 URL 提取基础域名",

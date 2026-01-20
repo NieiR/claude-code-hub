@@ -75,7 +75,7 @@ export function PriorityCell({
     }
   };
 
-  const hasOverrides = overrides && Object.keys(overrides).length > 0;
+  const _hasOverrides = overrides && Object.keys(overrides).length > 0;
 
   // 只包含覆盖规则，不包含全局（全局在外面已经可编辑）
   const overrideRules: PriorityRule[] = Object.entries(overrides || {}).map(([group, val]) => ({
@@ -179,23 +179,19 @@ export function PriorityCell({
                       ✕
                     </Button>
                   </>
+                ) : onUpdatePriority ? (
+                  <button
+                    type="button"
+                    className="font-mono font-medium tabular-nums cursor-pointer hover:underline underline-offset-2 rounded-sm px-2 py-0.5 min-w-[2rem] text-right transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    onClick={() => {
+                      setEditingGlobal(true);
+                      setGlobalDraft(priority.toString());
+                    }}
+                  >
+                    {priority}
+                  </button>
                 ) : (
-                  <>
-                    {onUpdatePriority ? (
-                      <button
-                        type="button"
-                        className="font-mono font-medium tabular-nums cursor-pointer hover:underline underline-offset-2 rounded-sm px-2 py-0.5 min-w-[2rem] text-right transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        onClick={() => {
-                          setEditingGlobal(true);
-                          setGlobalDraft(priority.toString());
-                        }}
-                      >
-                        {priority}
-                      </button>
-                    ) : (
-                      <span className="font-mono font-medium tabular-nums px-2">{priority}</span>
-                    )}
-                  </>
+                  <span className="font-mono font-medium tabular-nums px-2">{priority}</span>
                 )}
               </div>
             </div>
