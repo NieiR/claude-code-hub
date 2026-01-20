@@ -313,7 +313,7 @@ export class ProxyProviderResolver {
           targetType: reusedProvider.providerType as NonNullable<
             ProviderChainItem["decisionContext"]
           >["targetType"],
-          requestedModel: session.getCurrentModel() || "",
+          requestedModel: session.getOriginalModel() || "",
           groupFilterApplied: false,
           beforeHealthCheck: 0,
           afterHealthCheck: 0,
@@ -396,7 +396,7 @@ export class ProxyProviderResolver {
                   targetType: session.provider.providerType as NonNullable<
                     ProviderChainItem["decisionContext"]
                   >["targetType"],
-                  requestedModel: session.getCurrentModel() || "",
+                  requestedModel: session.getOriginalModel() || "",
                   groupFilterApplied: false,
                   beforeHealthCheck: 0,
                   afterHealthCheck: 0,
@@ -453,7 +453,7 @@ export class ProxyProviderResolver {
               targetType: session.provider.providerType as NonNullable<
                 ProviderChainItem["decisionContext"]
               >["targetType"],
-              requestedModel: session.getCurrentModel() || "",
+              requestedModel: session.getOriginalModel() || "",
               groupFilterApplied: false,
               beforeHealthCheck: 0,
               afterHealthCheck: 0,
@@ -614,7 +614,7 @@ export class ProxyProviderResolver {
     }
 
     // 检查模型支持（使用新的模型匹配逻辑）
-    const requestedModel = session.getCurrentModel();
+    const requestedModel = session.getOriginalModel();
     if (requestedModel && !providerSupportsModel(provider, requestedModel)) {
       logger.debug("ProviderSelector: Session provider does not support requested model", {
         sessionId: session.sessionId,
@@ -722,7 +722,7 @@ export class ProxyProviderResolver {
     // 使用 Session 快照保证故障迁移期间数据一致性
     // 如果没有 session，回退到 findAllProviders（内部已使用缓存）
     const allProviders = session ? await session.getProvidersSnapshot() : await findAllProviders();
-    const requestedModel = session?.getCurrentModel() || "";
+    const requestedModel = session?.getOriginalModel() || "";
 
     // === Step 1: 分组预过滤（静默，用户只能看到自己分组内的供应商）===
     const effectiveGroupPick = getEffectiveProviderGroup(session);
