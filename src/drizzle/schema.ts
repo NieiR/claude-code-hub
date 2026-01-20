@@ -272,6 +272,23 @@ export const providers = pgTable('providers', {
   providersDeletedAtIdx: index('idx_providers_deleted_at').on(table.deletedAt),
 }));
 
+// Provider Group Priority table - 供应商分组优先级覆盖规则
+export const providerGroupPriorities = pgTable('provider_group_priorities', {
+  id: serial('id').primaryKey(),
+  providerId: integer('provider_id')
+    .notNull()
+    .references(() => providers.id, { onDelete: 'cascade' }),
+  groupTag: varchar('group_tag', { length: 50 }).notNull(),
+  priority: integer('priority').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+  // 唯一约束：同一供应商 + 同一分组只能有一条记录（也用于查询优化）
+  uniqueProviderGroup: uniqueIndex('unique_provider_group').on(table.providerId, table.groupTag),
+  // 查询优化：支持按分组查询所有覆盖规则
+  groupIdx: index('idx_provider_group_priority_group').on(table.groupTag, table.priority),
+}));
+
 // Message Request table
 export const messageRequest = pgTable('message_request', {
   id: serial('id').primaryKey(),
@@ -631,6 +648,14 @@ export const keysRelations = relations(keys, ({ one, many }) => ({
 
 export const providersRelations = relations(providers, ({ many }) => ({
   messageRequests: many(messageRequest),
+  groupPriorities: many(providerGroupPriorities),
+}));
+
+export const providerGroupPrioritiesRelations = relations(providerGroupPriorities, ({ one }) => ({
+  provider: one(providers, {
+    fields: [providerGroupPriorities.providerId],
+    references: [providers.id],
+  }),
 }));
 
 export const messageRequestRelations = relations(messageRequest, ({ one }) => ({

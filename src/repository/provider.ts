@@ -6,8 +6,34 @@ import { providers } from "@/drizzle/schema";
 import { getCachedProviders } from "@/lib/cache/provider-cache";
 import { getEnvConfig } from "@/lib/config";
 import { logger } from "@/lib/logger";
-import type { CreateProviderData, Provider, UpdateProviderData } from "@/types/provider";
+import type {
+  CreateProviderData,
+  Provider,
+  ProviderPriorityOverrides,
+  UpdateProviderData,
+} from "@/types/provider";
 import { toProvider } from "./_shared/transformers";
+import {
+  findProviderGroupPriorityMap,
+  replaceProviderGroupPriorities,
+} from "./provider-group-priority";
+
+type ProviderRow = Record<string, unknown> & { id: number };
+
+async function mapProvidersWithPriorityOverrides(rows: ProviderRow[]): Promise<Provider[]> {
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const overrides = await findProviderGroupPriorityMap(rows.map((row) => row.id));
+
+  return rows.map((row) =>
+    toProvider({
+      ...row,
+      priorityOverrides: overrides.get(row.id) ?? {},
+    })
+  );
+}
 
 export async function createProvider(providerData: CreateProviderData): Promise<Provider> {
   const dbData = {
@@ -64,60 +90,75 @@ export async function createProvider(providerData: CreateProviderData): Promise<
     cc: providerData.cc,
   };
 
-  const [provider] = await db.insert(providers).values(dbData).returning({
-    id: providers.id,
-    name: providers.name,
-    url: providers.url,
-    key: providers.key,
-    isEnabled: providers.isEnabled,
-    weight: providers.weight,
-    priority: providers.priority,
-    costMultiplier: providers.costMultiplier,
-    groupTag: providers.groupTag,
-    providerType: providers.providerType,
-    preserveClientIp: providers.preserveClientIp,
-    modelRedirects: providers.modelRedirects,
-    allowedModels: providers.allowedModels,
-    joinClaudePool: providers.joinClaudePool,
-    codexInstructionsStrategy: providers.codexInstructionsStrategy,
-    mcpPassthroughType: providers.mcpPassthroughType,
-    mcpPassthroughUrl: providers.mcpPassthroughUrl,
-    limit5hUsd: providers.limit5hUsd,
-    limitDailyUsd: providers.limitDailyUsd,
-    dailyResetMode: providers.dailyResetMode,
-    dailyResetTime: providers.dailyResetTime,
-    limitWeeklyUsd: providers.limitWeeklyUsd,
-    limitMonthlyUsd: providers.limitMonthlyUsd,
-    limitTotalUsd: providers.limitTotalUsd,
-    totalCostResetAt: providers.totalCostResetAt,
-    limitConcurrentSessions: providers.limitConcurrentSessions,
-    maxRetryAttempts: providers.maxRetryAttempts,
-    circuitBreakerFailureThreshold: providers.circuitBreakerFailureThreshold,
-    circuitBreakerOpenDuration: providers.circuitBreakerOpenDuration,
-    circuitBreakerHalfOpenSuccessThreshold: providers.circuitBreakerHalfOpenSuccessThreshold,
-    proxyUrl: providers.proxyUrl,
-    proxyFallbackToDirect: providers.proxyFallbackToDirect,
-    firstByteTimeoutStreamingMs: providers.firstByteTimeoutStreamingMs,
-    streamingIdleTimeoutMs: providers.streamingIdleTimeoutMs,
-    requestTimeoutNonStreamingMs: providers.requestTimeoutNonStreamingMs,
-    websiteUrl: providers.websiteUrl,
-    faviconUrl: providers.faviconUrl,
-    cacheTtlPreference: providers.cacheTtlPreference,
-    context1mPreference: providers.context1mPreference,
-    codexReasoningEffortPreference: providers.codexReasoningEffortPreference,
-    codexReasoningSummaryPreference: providers.codexReasoningSummaryPreference,
-    codexTextVerbosityPreference: providers.codexTextVerbosityPreference,
-    codexParallelToolCallsPreference: providers.codexParallelToolCallsPreference,
-    tpm: providers.tpm,
-    rpm: providers.rpm,
-    rpd: providers.rpd,
-    cc: providers.cc,
-    createdAt: providers.createdAt,
-    updatedAt: providers.updatedAt,
-    deletedAt: providers.deletedAt,
-  });
+  return db.transaction(async (tx) => {
+    const [provider] = await tx.insert(providers).values(dbData).returning({
+      id: providers.id,
+      name: providers.name,
+      url: providers.url,
+      key: providers.key,
+      isEnabled: providers.isEnabled,
+      weight: providers.weight,
+      priority: providers.priority,
+      costMultiplier: providers.costMultiplier,
+      groupTag: providers.groupTag,
+      providerType: providers.providerType,
+      preserveClientIp: providers.preserveClientIp,
+      modelRedirects: providers.modelRedirects,
+      allowedModels: providers.allowedModels,
+      joinClaudePool: providers.joinClaudePool,
+      codexInstructionsStrategy: providers.codexInstructionsStrategy,
+      mcpPassthroughType: providers.mcpPassthroughType,
+      mcpPassthroughUrl: providers.mcpPassthroughUrl,
+      limit5hUsd: providers.limit5hUsd,
+      limitDailyUsd: providers.limitDailyUsd,
+      dailyResetMode: providers.dailyResetMode,
+      dailyResetTime: providers.dailyResetTime,
+      limitWeeklyUsd: providers.limitWeeklyUsd,
+      limitMonthlyUsd: providers.limitMonthlyUsd,
+      limitTotalUsd: providers.limitTotalUsd,
+      totalCostResetAt: providers.totalCostResetAt,
+      limitConcurrentSessions: providers.limitConcurrentSessions,
+      maxRetryAttempts: providers.maxRetryAttempts,
+      circuitBreakerFailureThreshold: providers.circuitBreakerFailureThreshold,
+      circuitBreakerOpenDuration: providers.circuitBreakerOpenDuration,
+      circuitBreakerHalfOpenSuccessThreshold: providers.circuitBreakerHalfOpenSuccessThreshold,
+      proxyUrl: providers.proxyUrl,
+      proxyFallbackToDirect: providers.proxyFallbackToDirect,
+      firstByteTimeoutStreamingMs: providers.firstByteTimeoutStreamingMs,
+      streamingIdleTimeoutMs: providers.streamingIdleTimeoutMs,
+      requestTimeoutNonStreamingMs: providers.requestTimeoutNonStreamingMs,
+      websiteUrl: providers.websiteUrl,
+      faviconUrl: providers.faviconUrl,
+      cacheTtlPreference: providers.cacheTtlPreference,
+      context1mPreference: providers.context1mPreference,
+      codexReasoningEffortPreference: providers.codexReasoningEffortPreference,
+      codexReasoningSummaryPreference: providers.codexReasoningSummaryPreference,
+      codexTextVerbosityPreference: providers.codexTextVerbosityPreference,
+      codexParallelToolCallsPreference: providers.codexParallelToolCallsPreference,
+      tpm: providers.tpm,
+      rpm: providers.rpm,
+      rpd: providers.rpd,
+      cc: providers.cc,
+      createdAt: providers.createdAt,
+      updatedAt: providers.updatedAt,
+      deletedAt: providers.deletedAt,
+    });
 
-  return toProvider(provider);
+    let priorityOverrides: ProviderPriorityOverrides = {};
+    if (providerData.priority_overrides !== undefined) {
+      priorityOverrides = await replaceProviderGroupPriorities(
+        tx,
+        provider.id,
+        providerData.priority_overrides,
+        { source: "createProvider" }
+      );
+    }
+
+    return toProvider({
+      ...provider,
+      priorityOverrides,
+    });
+  });
 }
 
 export async function findProviderList(
@@ -188,7 +229,7 @@ export async function findProviderList(
     ids: result.map((r) => r.id),
   });
 
-  return result.map(toProvider);
+  return mapProvidersWithPriorityOverrides(result);
 }
 
 /**
@@ -261,7 +302,7 @@ export async function findAllProvidersFresh(): Promise<Provider[]> {
     ids: result.map((r) => r.id),
   });
 
-  return result.map(toProvider);
+  return mapProvidersWithPriorityOverrides(result);
 }
 
 /**
@@ -335,7 +376,9 @@ export async function findProviderById(id: number): Promise<Provider | null> {
     .where(and(eq(providers.id, id), isNull(providers.deletedAt)));
 
   if (!provider) return null;
-  return toProvider(provider);
+
+  const [withOverrides] = await mapProvidersWithPriorityOverrides([provider]);
+  return withOverrides ?? null;
 }
 
 export async function updateProvider(
@@ -434,6 +477,83 @@ export async function updateProvider(
   if (providerData.rpd !== undefined) dbData.rpd = providerData.rpd;
   if (providerData.cc !== undefined) dbData.cc = providerData.cc;
 
+  const hasPriorityOverrides = providerData.priority_overrides !== undefined;
+
+  if (hasPriorityOverrides) {
+    return await db.transaction(async (tx) => {
+      const [provider] = await tx
+        .update(providers)
+        .set(dbData)
+        .where(and(eq(providers.id, id), isNull(providers.deletedAt)))
+        .returning({
+          id: providers.id,
+          name: providers.name,
+          url: providers.url,
+          key: providers.key,
+          isEnabled: providers.isEnabled,
+          weight: providers.weight,
+          priority: providers.priority,
+          costMultiplier: providers.costMultiplier,
+          groupTag: providers.groupTag,
+          providerType: providers.providerType,
+          preserveClientIp: providers.preserveClientIp,
+          modelRedirects: providers.modelRedirects,
+          allowedModels: providers.allowedModels,
+          joinClaudePool: providers.joinClaudePool,
+          codexInstructionsStrategy: providers.codexInstructionsStrategy,
+          mcpPassthroughType: providers.mcpPassthroughType,
+          mcpPassthroughUrl: providers.mcpPassthroughUrl,
+          limit5hUsd: providers.limit5hUsd,
+          limitDailyUsd: providers.limitDailyUsd,
+          dailyResetMode: providers.dailyResetMode,
+          dailyResetTime: providers.dailyResetTime,
+          limitWeeklyUsd: providers.limitWeeklyUsd,
+          limitMonthlyUsd: providers.limitMonthlyUsd,
+          limitTotalUsd: providers.limitTotalUsd,
+          totalCostResetAt: providers.totalCostResetAt,
+          limitConcurrentSessions: providers.limitConcurrentSessions,
+          maxRetryAttempts: providers.maxRetryAttempts,
+          circuitBreakerFailureThreshold: providers.circuitBreakerFailureThreshold,
+          circuitBreakerOpenDuration: providers.circuitBreakerOpenDuration,
+          circuitBreakerHalfOpenSuccessThreshold: providers.circuitBreakerHalfOpenSuccessThreshold,
+          proxyUrl: providers.proxyUrl,
+          proxyFallbackToDirect: providers.proxyFallbackToDirect,
+          firstByteTimeoutStreamingMs: providers.firstByteTimeoutStreamingMs,
+          streamingIdleTimeoutMs: providers.streamingIdleTimeoutMs,
+          requestTimeoutNonStreamingMs: providers.requestTimeoutNonStreamingMs,
+          websiteUrl: providers.websiteUrl,
+          faviconUrl: providers.faviconUrl,
+          cacheTtlPreference: providers.cacheTtlPreference,
+          context1mPreference: providers.context1mPreference,
+          codexReasoningEffortPreference: providers.codexReasoningEffortPreference,
+          codexReasoningSummaryPreference: providers.codexReasoningSummaryPreference,
+          codexTextVerbosityPreference: providers.codexTextVerbosityPreference,
+          codexParallelToolCallsPreference: providers.codexParallelToolCallsPreference,
+          tpm: providers.tpm,
+          rpm: providers.rpm,
+          rpd: providers.rpd,
+          cc: providers.cc,
+          createdAt: providers.createdAt,
+          updatedAt: providers.updatedAt,
+          deletedAt: providers.deletedAt,
+        });
+
+      if (!provider) return null;
+
+      const priorityOverrides = await replaceProviderGroupPriorities(
+        tx,
+        provider.id,
+        providerData.priority_overrides,
+        { source: "updateProvider" }
+      );
+
+      return toProvider({
+        ...provider,
+        priorityOverrides,
+      });
+    });
+  }
+
   const [provider] = await db
     .update(providers)
     .set(dbData)
@@ -492,7 +612,12 @@ export async function updateProvider(
     });
 
   if (!provider) return null;
-  return toProvider(provider);
+
+  const overrides = await findProviderGroupPriorityMap([provider.id]);
+  return toProvider({
+    ...provider,
+    priorityOverrides: overrides.get(provider.id) ?? {},
+  });
 }
 
 export async function updateProviderPrioritiesBatch(

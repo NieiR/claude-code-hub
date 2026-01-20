@@ -92,6 +92,77 @@ function checkProviderGroupMatch(providerGroupTag: string | null, userGroups: st
 }
 
 /**
+ * 解析供应商在特定用户分组下的有效优先级
+ *
+ * 逻辑：
+ * 1. 如果用户分组匹配到供应商的某个 priorityOverrides 规则，使用覆盖优先级
+ * 2. 如果用户有多个分组且多个规则命中，取最小值（最高优先级）
+ * 3. 否则回退到全局 priority
+ */
+function resolveProviderPriority(provider: Provider, userGroups: string | null): number {
+  const basePriority = provider.priority ?? 0;
+
+  if (!userGroups || !provider.priorityOverrides) {
+    return basePriority;
+  }
+
+  const overrides = provider.priorityOverrides;
+  if (Object.keys(overrides).length === 0) {
+    return basePriority;
+  }
+
+  const groups = parseGroupString(userGroups);
+
+  if (groups.includes(PROVIDER_GROUP.ALL)) {
+    return basePriority;
+  }
+
+  const providerTags = provider.groupTag
+    ? parseGroupString(provider.groupTag)
+    : [PROVIDER_GROUP.DEFAULT];
+
+  const applicableGroups = groups.filter((group) => providerTags.includes(group));
+  let minPriority = basePriority;
+  let hasOverride = false;
+
+  for (const group of applicableGroups) {
+    const override = overrides[group];
+    if (override === undefined || override === null) {
+      continue;
+    }
+
+    const parsed = Number(override);
+    if (!Number.isFinite(parsed)) {
+      logger.debug("ProviderSelector: Invalid priority override ignored", {
+        providerId: provider.id,
+        groupTag: group,
+        value: override,
+      });
+      continue;
+    }
+
+    const normalized = Math.trunc(parsed);
+    if (!hasOverride || normalized < minPriority) {
+      minPriority = normalized;
+      hasOverride = true;
+    }
+  }
+
+  if (hasOverride) {
+    logger.debug("ProviderSelector: Using group-specific priority", {
+      providerId: provider.id,
+      providerName: provider.name,
+      userGroups,
+      applicableGroups,
+      overridePriority: minPriority,
+      globalPriority: basePriority,
+    });
+  }
+
+  return hasOverride ? minPriority : basePriority;
+}
+
+/**
  * 检查供应商是否支持指定模型（用于调度器匹配）
  *
  * 核心逻辑：
@@ -228,6 +299,9 @@ export class ProxyProviderResolver {
     if (reusedProvider) {
       session.setProvider(reusedProvider);
 
+      const effectiveGroup = getEffectiveProviderGroup(session);
+      const reusedPriority = resolveProviderPriority(reusedProvider, effectiveGroup);
+
       // 记录会话复用上下文
       session.addProviderToChain(reusedProvider, {
         reason: "session_reuse",
@@ -243,8 +317,8 @@ export class ProxyProviderResolver {
           groupFilterApplied: false,
           beforeHealthCheck: 0,
           afterHealthCheck: 0,
-          priorityLevels: [reusedProvider.priority || 0],
-          selectedPriority: reusedProvider.priority || 0,
+          priorityLevels: [reusedPriority],
+          selectedPriority: reusedPriority,
           candidatesAtPriority: [
             {
               id: reusedProvider.id,
@@ -882,12 +956,17 @@ export class ProxyProviderResolver {
     }
 
     // Step 5: 优先级分层（只选择最高优先级的供应商）
-    const topPriorityProviders = ProxyProviderResolver.selectTopPriority(healthyProviders);
-    const priorities = [...new Set(healthyProviders.map((p) => p.priority || 0))].sort(
-      (a, b) => a - b
+    const topPriorityProviders = ProxyProviderResolver.selectTopPriority(
+      healthyProviders,
+      effectiveGroupPick
     );
+    const priorities = [
+      ...new Set(healthyProviders.map((p) => resolveProviderPriority(p, effectiveGroupPick))),
+    ].sort((a, b) => a - b);
     context.priorityLevels = priorities;
-    context.selectedPriority = Math.min(...healthyProviders.map((p) => p.priority || 0));
+    context.selectedPriority = Math.min(
+      ...healthyProviders.map((p) => resolveProviderPriority(p, effectiveGroupPick))
+    );
 
     // Step 6: 成本排序 + 加权选择 + 计算概率
     const totalWeight = topPriorityProviders.reduce((sum, p) => sum + p.weight, 0);
@@ -991,16 +1070,16 @@ export class ProxyProviderResolver {
   /**
    * 优先级分层：只选择最高优先级的供应商
    */
-  private static selectTopPriority(providers: Provider[]): Provider[] {
+  private static selectTopPriority(providers: Provider[], userGroup: string | null): Provider[] {
     if (providers.length === 0) {
       return [];
     }
 
-    // 找到最小的优先级值（最高优先级）
-    const minPriority = Math.min(...providers.map((p) => p.priority || 0));
+    // 找到最小的有效优先级值（最高优先级）
+    const minPriority = Math.min(...providers.map((p) => resolveProviderPriority(p, userGroup)));
 
     // 只返回该优先级的供应商
-    return providers.filter((p) => (p.priority || 0) === minPriority);
+    return providers.filter((p) => resolveProviderPriority(p, userGroup) === minPriority);
   }
 
   /**
@@ -1139,10 +1218,14 @@ export class ProxyProviderResolver {
     }
 
     // 优先级分层
-    const topPriorityProviders = ProxyProviderResolver.selectTopPriority(healthyProviders);
+    const topPriorityProviders = ProxyProviderResolver.selectTopPriority(
+      healthyProviders,
+      effectiveGroupPick
+    );
 
     // 成本排序 + 加权随机选择
     const selected = ProxyProviderResolver.selectOptimal(topPriorityProviders);
+    const selectedEffectivePriority = resolveProviderPriority(selected, effectiveGroupPick);
 
     // 计算候选者概率
     const totalWeight = topPriorityProviders.reduce((sum, p) => sum + p.weight, 0);
@@ -1166,10 +1249,10 @@ export class ProxyProviderResolver {
         beforeHealthCheck: typeFiltered.length,
         afterHealthCheck: healthyProviders.length,
         filteredProviders: [],
-        priorityLevels: [...new Set(healthyProviders.map((p) => p.priority || 0))].sort(
-          (a, b) => a - b
-        ),
-        selectedPriority: selected.priority || 0,
+        priorityLevels: [
+          ...new Set(healthyProviders.map((p) => resolveProviderPriority(p, effectiveGroupPick))),
+        ].sort((a, b) => a - b),
+        selectedPriority: selectedEffectivePriority,
         candidatesAtPriority: candidates,
       },
     };

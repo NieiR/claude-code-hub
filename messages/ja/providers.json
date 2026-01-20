@@ -1,5 +1,6 @@
 {
   "_comment": "Provider types and related translations for Japanese",
+  "types": {
 
   "types": {
     "claude": {
@@ -26,5 +27,12 @@
       "label": "OpenAI Compatible",
       "description": "OpenAI 互換 API"
     }
+  }
+  },
+  "priority": {
+    "global": "グローバル",
+    "globalDefaultTooltip": "グローバルデフォルト優先度",
+    "groupPriorityTooltip": "{group}グループ優先度",
+    "moreOverrides": "その他のオーバーライド"
   }
 }

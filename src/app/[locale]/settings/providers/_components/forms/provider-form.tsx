@@ -47,8 +47,10 @@ import type {
   CodexTextVerbosityPreference,
   McpPassthroughType,
   ProviderDisplay,
+  ProviderPriorityOverrides,
   ProviderType,
 } from "@/types/provider";
+import { GroupPriorityManager } from "../GroupPriorityManager";
 import { ModelMultiSelect } from "../model-multi-select";
 import { ModelRedirectEditor } from "../model-redirect-editor";
 import { ApiTestButton } from "./api-test-button";
@@ -141,6 +143,9 @@ export function ProviderForm({
           .map((t) => t.trim())
           .filter(Boolean)
       : []
+  );
+  const [priorityOverrides, setPriorityOverrides] = useState<ProviderPriorityOverrides>(
+    sourceProvider?.priorityOverrides ?? {}
   );
   const [groupSuggestions, setGroupSuggestions] = useState<string[]>([]);
   const [limit5hUsd, setLimit5hUsd] = useState<number | null>(sourceProvider?.limit5hUsd ?? null);
@@ -410,6 +415,7 @@ export function ProviderForm({
             weight?: number;
             cost_multiplier?: number;
             group_tag?: string | null;
+            priority_overrides?: Record<string, number> | null;
             limit_5h_usd?: number | null;
             limit_daily_usd?: number | null;
             daily_reset_mode?: "fixed" | "rolling";
@@ -453,6 +459,8 @@ export function ProviderForm({
             weight: weight,
             cost_multiplier: costMultiplier,
             group_tag: groupTag.length > 0 ? groupTag.join(",") : null,
+            priority_overrides:
+              Object.keys(priorityOverrides).length > 0 ? priorityOverrides : null,
             limit_5h_usd: limit5hUsd,
             limit_daily_usd: limitDailyUsd,
             daily_reset_mode: dailyResetMode,
@@ -518,6 +526,8 @@ export function ProviderForm({
             priority: priority,
             cost_multiplier: costMultiplier,
             group_tag: groupTag.length > 0 ? groupTag.join(",") : null,
+            priority_overrides:
+              Object.keys(priorityOverrides).length > 0 ? priorityOverrides : null,
             limit_5h_usd: limit5hUsd,
             limit_daily_usd: limitDailyUsd,
             daily_reset_mode: dailyResetMode,
@@ -581,6 +591,7 @@ export function ProviderForm({
           setWeight(1);
           setCostMultiplier(1.0);
           setGroupTag([]);
+          setPriorityOverrides({});
           setLimit5hUsd(null);
           setLimitDailyUsd(null);
           setDailyResetTime("00:00");
@@ -978,6 +989,13 @@ export function ProviderForm({
                       <p className="text-xs text-muted-foreground">
                         {t("sections.routing.scheduleParams.priority.desc")}
                       </p>
+                      <GroupPriorityManager
+                        value={priorityOverrides}
+                        onChange={setPriorityOverrides}
+                        currentGroupTags={groupTag}
+                        groupSuggestions={groupSuggestions}
+                        disabled={isPending}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor={isEdit ? "edit-weight" : "weight"}>

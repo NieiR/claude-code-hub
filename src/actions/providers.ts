@@ -50,6 +50,7 @@ import type {
   CodexReasoningSummaryPreference,
   CodexTextVerbosityPreference,
   ProviderDisplay,
+  ProviderPriorityOverrides,
   ProviderStatisticsMap,
   ProviderType,
 } from "@/types/provider";
@@ -235,6 +236,7 @@ export async function getProviders(): Promise<ProviderDisplay[]> {
         priority: provider.priority,
         costMultiplier: provider.costMultiplier,
         groupTag: provider.groupTag,
+        priorityOverrides: provider.priorityOverrides,
         providerType: provider.providerType,
         preserveClientIp: provider.preserveClientIp,
         modelRedirects: provider.modelRedirects,
@@ -436,6 +438,7 @@ export async function addProvider(data: {
   priority?: number;
   cost_multiplier?: number;
   group_tag?: string | null;
+  priority_overrides?: ProviderPriorityOverrides | null;
   provider_type?: ProviderType;
   preserve_client_ip?: boolean;
   model_redirects?: Record<string, string> | null;
@@ -493,7 +496,8 @@ export async function addProvider(data: {
       };
     }
 
-    const validated = CreateProviderSchema.parse(data);
+    const { priority_overrides, ...dataForValidation } = data;
+    const validated = CreateProviderSchema.parse(dataForValidation);
     logger.trace("addProvider:validated", { name: validated.name });
 
     // 获取 favicon URL
@@ -551,6 +555,7 @@ export async function addProvider(data: {
       rpm: validated.rpm ?? null,
       rpd: validated.rpd ?? null,
       cc: validated.cc ?? null,
+      ...(priority_overrides !== undefined && { priority_overrides }),
     };
 
     const provider = await createProvider(payload);
@@ -604,6 +609,7 @@ export async function editProvider(
     priority?: number;
     cost_multiplier?: number;
     group_tag?: string | null;
+    priority_overrides?: ProviderPriorityOverrides | null;
     provider_type?: ProviderType;
     preserve_client_ip?: boolean;
     model_redirects?: Record<string, string> | null;
@@ -654,7 +660,13 @@ export async function editProvider(
       };
     }
 
-    const validated = UpdateProviderSchema.parse(data);
+    const { priority_overrides, ...dataForValidation } = data;
+
+    // 如果只更新 priority_overrides，确保至少有一个字段通过验证
+    const validated =
+      Object.keys(dataForValidation).length > 0
+        ? UpdateProviderSchema.parse(dataForValidation)
+        : {};
 
     // 如果 website_url 被更新，重新生成 favicon URL
     let faviconUrl: string | null | undefined; // undefined 表示不更新
@@ -683,6 +695,7 @@ export async function editProvider(
     const payload = {
       ...validated,
       ...(faviconUrl !== undefined && { favicon_url: faviconUrl }),
+      ...(priority_overrides !== undefined && { priority_overrides }),
     };
 
     const provider = await updateProvider(providerId, payload);

@@ -1,5 +1,6 @@
 {
   "_comment": "Provider types and related translations for English",
+  "types": {
 
   "types": {
     "claude": {
@@ -26,5 +27,12 @@
       "label": "OpenAI Compatible",
       "description": "OpenAI Compatible API"
     }
+  }
+  },
+  "priority": {
+    "global": "Global",
+    "globalDefaultTooltip": "Global default priority",
+    "groupPriorityTooltip": "{group} group priority",
+    "moreOverrides": "More overrides"
   }
 }

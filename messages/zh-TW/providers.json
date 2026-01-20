@@ -1,5 +1,6 @@
 {
-  "_comment": "Provider types and related translations for Chinese Traditional",
+  "_comment": "Provider types and related translations for Traditional Chinese",
+  "types": {
 
   "types": {
     "claude": {
@@ -26,5 +27,12 @@
       "label": "OpenAI Compatible",
       "description": "OpenAI 兼容 API"
     }
+  }
+  },
+  "priority": {
+    "global": "全局",
+    "globalDefaultTooltip": "全局預設優先順序",
+    "groupPriorityTooltip": "{group} 分組優先順序",
+    "moreOverrides": "其他覆寫規則"
   }
 }

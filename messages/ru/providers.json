@@ -1,5 +1,6 @@
 {
   "_comment": "Provider types and related translations for Russian",
+  "types": {
 
   "types": {
     "claude": {
@@ -26,5 +27,12 @@
       "label": "OpenAI Compatible",
       "description": "API совместимый с OpenAI"
     }
+  }
+  },
+  "priority": {
+    "global": "Глобальный",
+    "globalDefaultTooltip": "Глобальный приоритет по умолчанию",
+    "groupPriorityTooltip": "Приоритет группы {group}",
+    "moreOverrides": "Другие переопределения"
   }
 }

@@ -36,6 +36,9 @@ export type CodexInstructionsStrategy = "auto" | "force_official" | "keep_origin
 // MCP 透传类型枚举
 export type McpPassthroughType = "none" | "minimax" | "glm" | "custom";
 
+// 供应商分组优先级覆盖规则：{ groupTag: priority }
+export type ProviderPriorityOverrides = Record<string, number>;
+
 export interface Provider {
   id: number;
   name: string;
@@ -50,6 +53,7 @@ export interface Provider {
   priority: number;
   costMultiplier: number;
   groupTag: string | null;
+  priorityOverrides?: ProviderPriorityOverrides;
 
   // 供应商类型：扩展支持 4 种类型
   providerType: ProviderType;
@@ -153,6 +157,7 @@ export interface ProviderDisplay {
   priority: number;
   costMultiplier: number;
   groupTag: string | null;
+  priorityOverrides?: ProviderPriorityOverrides;
   // 供应商类型
   providerType: ProviderType;
   // 是否透传客户端 IP
@@ -241,6 +246,7 @@ export interface CreateProviderData {
   priority?: number;
   cost_multiplier?: number;
   group_tag?: string | null;
+  priority_overrides?: ProviderPriorityOverrides | null;
 
   // 供应商类型和模型配置
   provider_type?: ProviderType;
@@ -311,6 +317,7 @@ export interface UpdateProviderData {
   priority?: number;
   cost_multiplier?: number;
   group_tag?: string | null;
+  priority_overrides?: ProviderPriorityOverrides | null;
 
   // 供应商类型和模型配置
   provider_type?: ProviderType;
