@@ -2,7 +2,7 @@
 
 import { Plus, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -53,6 +53,22 @@ export function PriorityCell({
   const [newPriority, setNewPriority] = useState(0);
   const [editingGlobal, setEditingGlobal] = useState(false);
   const [globalDraft, setGlobalDraft] = useState(() => priority.toString());
+  const [open, setOpen] = useState(false);
+
+  const globalInputRef = useRef<HTMLInputElement>(null);
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen && onUpdatePriority) {
+      setEditingGlobal(true);
+      setGlobalDraft(priority.toString());
+    } else if (!nextOpen) {
+      setEditingGlobal(false);
+      setGlobalDraft(priority.toString());
+      setEditingGroup(null);
+      setIsAddingNew(false);
+    }
+  };
 
   const trimmedGlobal = globalDraft.trim();
   const globalValidationError = validatePriority ? validatePriority(trimmedGlobal) : null;
@@ -64,12 +80,22 @@ export function PriorityCell({
     parsedGlobal != null &&
     Number.isFinite(parsedGlobal);
 
+  useEffect(() => {
+    if (editingGlobal) {
+      requestAnimationFrame(() => {
+        globalInputRef.current?.select();
+      });
+    }
+  }, [editingGlobal]);
+
   const handleSaveGlobal = async () => {
     if (!onUpdatePriority || !canSaveGlobal || parsedGlobal == null) return;
     setSaving(true);
     try {
       const success = await onUpdatePriority(parsedGlobal);
-      if (success) setEditingGlobal(false);
+      if (success) {
+        handleOpenChange(false);
+      }
     } finally {
       setSaving(false);
     }
@@ -100,7 +126,7 @@ export function PriorityCell({
 
   return (
     <div className="flex items-center justify-center gap-2 h-8">
-      <Popover>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -134,10 +160,11 @@ export function PriorityCell({
               )}
             >
               <span className="text-muted-foreground">{t("global")}</span>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 {editingGlobal && onUpdatePriority ? (
                   <>
                     <Input
+                      ref={globalInputRef}
                       type="number"
                       value={globalDraft}
                       onChange={(e) => setGlobalDraft(e.target.value)}
@@ -251,7 +278,7 @@ export function PriorityCell({
                   }
                 >
                   <span className="truncate max-w-[120px]">{rule.label}</span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-3">
                     {isEditing ? (
                       <>
                         <Input
@@ -262,6 +289,7 @@ export function PriorityCell({
                           min={0}
                           disabled={saving}
                           autoFocus
+                          onFocus={(e) => e.target.select()}
                           onKeyDown={(e) => {
                             if (e.key === "Enter") handleSave();
                             if (e.key === "Escape") handleCancel();
