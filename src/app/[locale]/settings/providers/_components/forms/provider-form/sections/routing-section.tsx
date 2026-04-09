@@ -223,6 +223,91 @@ export function RoutingSection({ subSectionRefs }: RoutingSectionProps) {
 
           <div className="border-t border-border/30" />
 
+          {/* Vision Redirect */}
+          <FieldGroup
+            label={t("sections.routing.visionRedirect.label")}
+            badge={
+              state.vision.enabled ? (
+                <Badge variant="secondary" className="text-[10px] px-1.5 py-0 font-normal">
+                  ON
+                </Badge>
+              ) : null
+            }
+          >
+            <div className="space-y-3">
+              <ToggleRow
+                label={t("sections.routing.visionRedirect.enabled.label")}
+                description={t("sections.routing.visionRedirect.enabled.desc")}
+              >
+                <Switch
+                  checked={state.vision.enabled}
+                  onCheckedChange={(checked) =>
+                    dispatch({ type: "SET_VISION_ENABLED", payload: checked })
+                  }
+                  disabled={state.ui.isPending}
+                />
+              </ToggleRow>
+
+              {state.vision.enabled && (
+                <div className="space-y-3 pl-1">
+                  <SmartInputWrapper label={t("sections.routing.visionRedirect.targetProvider.label")}>
+                    <Input
+                      type="number"
+                      value={state.vision.targetProviderId?.toString() ?? ""}
+                      onChange={(e) =>
+                        dispatch({
+                          type: "SET_VISION_TARGET_PROVIDER_ID",
+                          payload: e.target.value ? Number(e.target.value) : null,
+                        })
+                      }
+                      placeholder={t("sections.routing.visionRedirect.targetProvider.placeholder")}
+                      disabled={state.ui.isPending}
+                    />
+                  </SmartInputWrapper>
+
+                  <SmartInputWrapper label={t("sections.routing.visionRedirect.targetModel.label")}>
+                    <Input
+                      value={state.vision.targetModel}
+                      onChange={(e) =>
+                        dispatch({ type: "SET_VISION_TARGET_MODEL", payload: e.target.value })
+                      }
+                      placeholder={t("sections.routing.visionRedirect.targetModel.placeholder")}
+                      disabled={state.ui.isPending}
+                    />
+                  </SmartInputWrapper>
+
+                  <SmartInputWrapper label={t("sections.routing.visionRedirect.descriptionFormat.label")}>
+                    <Input
+                      value={state.vision.descriptionFormat}
+                      onChange={(e) =>
+                        dispatch({ type: "SET_VISION_DESCRIPTION_FORMAT", payload: e.target.value })
+                      }
+                      placeholder="[Image Description] ... [/Image Description]"
+                      disabled={state.ui.isPending}
+                    />
+                  </SmartInputWrapper>
+
+                  <SmartInputWrapper label={t("sections.routing.visionRedirect.timeout.label")}>
+                    <Input
+                      type="number"
+                      value={state.vision.timeoutMs}
+                      onChange={(e) =>
+                        dispatch({
+                          type: "SET_VISION_TIMEOUT_MS",
+                          payload: Number(e.target.value) || 30000,
+                        })
+                      }
+                      placeholder="30000"
+                      disabled={state.ui.isPending}
+                    />
+                  </SmartInputWrapper>
+                </div>
+              )}
+            </div>
+          </FieldGroup>
+
+          <div className="border-t border-border/30" />
+
           {/* Allowed Models */}
           <FieldGroup
             label={t("sections.routing.modelWhitelist.label")}
