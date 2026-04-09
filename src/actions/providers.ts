@@ -312,6 +312,7 @@ export async function getProviders(): Promise<ProviderDisplay[]> {
         blockedClients: provider.blockedClients,
         mcpPassthroughType: provider.mcpPassthroughType,
         mcpPassthroughUrl: provider.mcpPassthroughUrl,
+        visionRedirect: provider.visionRedirect,
         limit5hUsd: provider.limit5hUsd,
         limitDailyUsd: provider.limitDailyUsd,
         dailyResetMode: provider.dailyResetMode,
@@ -1351,6 +1352,7 @@ const SINGLE_EDIT_PREIMAGE_FIELD_TO_PROVIDER_KEY: Record<string, keyof Provider>
   favicon_url: "faviconUrl",
   mcp_passthrough_type: "mcpPassthroughType",
   mcp_passthrough_url: "mcpPassthroughUrl",
+  vision_redirect: "visionRedirect",
   tpm: "tpm",
   rpm: "rpm",
   rpd: "rpd",
@@ -1583,6 +1585,9 @@ function mapApplyUpdatesToRepositoryFormat(
   if (applyUpdates.mcp_passthrough_url !== undefined) {
     result.mcpPassthroughUrl = applyUpdates.mcp_passthrough_url;
   }
+  if (applyUpdates.vision_redirect !== undefined) {
+    result.visionRedirect = applyUpdates.vision_redirect;
+  }
   return result;
 }
 
@@ -1632,6 +1637,7 @@ const PATCH_FIELD_TO_PROVIDER_KEY: Record<ProviderBatchPatchField, keyof Provide
   request_timeout_non_streaming_ms: "requestTimeoutNonStreamingMs",
   mcp_passthrough_type: "mcpPassthroughType",
   mcp_passthrough_url: "mcpPassthroughUrl",
+  vision_redirect: "visionRedirect",
 };
 
 const PATCH_FIELD_CLEAR_VALUE: Partial<Record<ProviderBatchPatchField, unknown>> = {

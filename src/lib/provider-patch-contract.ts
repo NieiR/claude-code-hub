@@ -77,6 +77,7 @@ const PATCH_FIELDS: ProviderBatchPatchField[] = [
   // MCP
   "mcp_passthrough_type",
   "mcp_passthrough_url",
+  "vision_redirect",
 ];
 const PATCH_FIELD_SET = new Set(PATCH_FIELDS);
 
@@ -131,6 +132,7 @@ const CLEARABLE_FIELDS: Record<ProviderBatchPatchField, boolean> = {
   // MCP
   mcp_passthrough_type: false,
   mcp_passthrough_url: true,
+  vision_redirect: true,
 };
 
 function isNumberRecord(value: unknown): value is Record<string, number> {
@@ -235,6 +237,8 @@ function isValidSetValue(field: ProviderBatchPatchField, value: unknown): boolea
     case "proxy_url":
     case "mcp_passthrough_url":
       return typeof value === "string";
+    case "vision_redirect":
+      return isRecord(value) && typeof value.enabled === "boolean";
     case "active_time_start":
     case "active_time_end":
       return typeof value === "string" && /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value);
@@ -616,6 +620,12 @@ export function normalizeProviderBatchPatchDraft(
   );
   if (!mcpPassthroughUrl.ok) return mcpPassthroughUrl;
 
+  const visionRedirect = normalizePatchField(
+    "vision_redirect",
+    typedDraft.vision_redirect
+  );
+  if (!visionRedirect.ok) return visionRedirect;
+
   return {
     ok: true,
     data: {
@@ -669,6 +679,7 @@ export function normalizeProviderBatchPatchDraft(
       // MCP
       mcp_passthrough_type: mcpPassthroughType.data,
       mcp_passthrough_url: mcpPassthroughUrl.data,
+      vision_redirect: visionRedirect.data,
     },
   };
 }
@@ -851,6 +862,10 @@ function applyPatchField<T>(
         updates.mcp_passthrough_url =
           patch.value as ProviderBatchApplyUpdates["mcp_passthrough_url"];
         return { ok: true, data: undefined };
+      case "vision_redirect":
+        updates.vision_redirect =
+          patch.value as ProviderBatchApplyUpdates["vision_redirect"];
+        return { ok: true, data: undefined };
       default:
         return createInvalidPatchShapeError(field, "Unsupported patch field");
     }
@@ -946,6 +961,9 @@ function applyPatchField<T>(
     case "mcp_passthrough_url":
       updates.mcp_passthrough_url = null;
       return { ok: true, data: undefined };
+    case "vision_redirect":
+      updates.vision_redirect = null;
+      return { ok: true, data: undefined };
     default:
       return createInvalidPatchShapeError(field, "clear mode is not supported for this field");
   }
@@ -1010,6 +1028,7 @@ export function buildProviderBatchApplyUpdates(
     // MCP
     ["mcp_passthrough_type", patch.mcp_passthrough_type],
     ["mcp_passthrough_url", patch.mcp_passthrough_url],
+    ["vision_redirect", patch.vision_redirect],
   ];
 
   for (const [field, operation] of operations) {
@@ -1073,7 +1092,8 @@ export function hasProviderBatchPatchChanges(patch: ProviderBatchPatch): boolean
     patch.request_timeout_non_streaming_ms.mode !== "no_change" ||
     // MCP
     patch.mcp_passthrough_type.mode !== "no_change" ||
-    patch.mcp_passthrough_url.mode !== "no_change"
+    patch.mcp_passthrough_url.mode !== "no_change" ||
+    patch.vision_redirect.mode !== "no_change"
   );
 }
 
