@@ -18,6 +18,7 @@ import type {
   Provider,
   ProviderModelRedirectRule,
   UpdateProviderData,
+  VisionRedirectConfig,
 } from "@/types/provider";
 import { toProvider } from "./_shared/transformers";
 import {
@@ -214,6 +215,7 @@ export async function createProvider(providerData: CreateProviderData): Promise<
     activeTimeEnd: providerData.active_time_end ?? null,
     mcpPassthroughType: providerData.mcp_passthrough_type ?? "none",
     mcpPassthroughUrl: providerData.mcp_passthrough_url ?? null,
+    visionRedirect: providerData.vision_redirect ?? null,
     limit5hUsd: providerData.limit_5h_usd != null ? providerData.limit_5h_usd.toString() : null,
     limitDailyUsd:
       providerData.limit_daily_usd != null ? providerData.limit_daily_usd.toString() : null,
@@ -300,6 +302,7 @@ export async function createProvider(providerData: CreateProviderData): Promise<
         activeTimeEnd: providers.activeTimeEnd,
         mcpPassthroughType: providers.mcpPassthroughType,
         mcpPassthroughUrl: providers.mcpPassthroughUrl,
+        visionRedirect: providers.visionRedirect,
         limit5hUsd: providers.limit5hUsd,
         limitDailyUsd: providers.limitDailyUsd,
         dailyResetMode: providers.dailyResetMode,
@@ -654,6 +657,8 @@ export async function updateProvider(
     dbData.mcpPassthroughType = providerData.mcp_passthrough_type;
   if (providerData.mcp_passthrough_url !== undefined)
     dbData.mcpPassthroughUrl = providerData.mcp_passthrough_url;
+  if (providerData.vision_redirect !== undefined)
+    dbData.visionRedirect = providerData.vision_redirect;
   if (providerData.limit_5h_usd !== undefined)
     dbData.limit5hUsd =
       providerData.limit_5h_usd != null ? providerData.limit_5h_usd.toString() : null;
@@ -804,6 +809,7 @@ export async function updateProvider(
         activeTimeEnd: providers.activeTimeEnd,
         mcpPassthroughType: providers.mcpPassthroughType,
         mcpPassthroughUrl: providers.mcpPassthroughUrl,
+        visionRedirect: providers.visionRedirect,
         limit5hUsd: providers.limit5hUsd,
         limitDailyUsd: providers.limitDailyUsd,
         dailyResetMode: providers.dailyResetMode,
@@ -1095,6 +1101,7 @@ export interface BatchProviderUpdates {
   // MCP
   mcpPassthroughType?: string;
   mcpPassthroughUrl?: string | null;
+  visionRedirect?: VisionRedirectConfig | null;
 }
 
 export async function updateProvidersBatch(
@@ -1249,6 +1256,9 @@ export async function updateProvidersBatch(
   }
   if (updates.mcpPassthroughUrl !== undefined) {
     setClauses.mcpPassthroughUrl = updates.mcpPassthroughUrl;
+  }
+  if (updates.visionRedirect !== undefined) {
+    setClauses.visionRedirect = updates.visionRedirect;
   }
 
   if (Object.keys(setClauses).length === 1) {
