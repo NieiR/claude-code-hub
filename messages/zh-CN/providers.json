@@ -26,5 +26,12 @@
       "label": "OpenAI Compatible",
       "description": "OpenAI 兼容 API"
     }
-  }
+  },
+  "visionRedirect": "视觉重定向",
+  "visionRedirectDesc": "将图片内容重定向到多模态供应商进行描述后再转发请求",
+  "visionRedirectEnabled": "启用视觉重定向",
+  "visionRedirectTargetProvider": "目标供应商",
+  "visionRedirectTargetModel": "覆写模型",
+  "visionRedirectDescriptionFormat": "描述格式",
+  "visionRedirectTimeout": "超时时间 (ms)"
 }

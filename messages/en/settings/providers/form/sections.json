@@ -298,6 +298,27 @@
       "label": "Model Redirects",
       "optional": "(optional)"
     },
+    "visionRedirect": {
+      "label": "Vision Redirect",
+      "enabled": {
+        "label": "Enable Vision Redirect",
+        "desc": "Redirect image content to a multimodal provider for description before forwarding the request"
+      },
+      "targetProvider": {
+        "label": "Target Provider",
+        "placeholder": "Enter provider ID"
+      },
+      "targetModel": {
+        "label": "Override Model (optional)",
+        "placeholder": "e.g. gpt-4o, leave empty to use request model"
+      },
+      "descriptionFormat": {
+        "label": "Description Format"
+      },
+      "timeout": {
+        "label": "Timeout (ms)"
+      }
+    },
   "modelWhitelist": {
     "allowAll": "✓ Allow all models (recommended)",
     "desc": "Restrict which models this provider can serve. By default, a provider can serve all models of its type.",

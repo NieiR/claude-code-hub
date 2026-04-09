@@ -26,5 +26,12 @@
       "label": "OpenAI Compatible",
       "description": "API совместимый с OpenAI"
     }
-  }
+  },
+  "visionRedirect": "Визуальный редирект",
+  "visionRedirectDesc": "Перенаправление содержимого изображений мультимодальному провайдеру для описания перед пересылкой запроса",
+  "visionRedirectEnabled": "Включить визуальный редирект",
+  "visionRedirectTargetProvider": "Целевой провайдер",
+  "visionRedirectTargetModel": "Переопределить модель",
+  "visionRedirectDescriptionFormat": "Формат описания",
+  "visionRedirectTimeout": "Таймаут (мс)"
 }
