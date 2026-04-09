@@ -123,7 +123,8 @@ export type ProviderBatchPatchField =
   | "request_timeout_non_streaming_ms"
   // MCP
   | "mcp_passthrough_type"
-  | "mcp_passthrough_url";
+  | "mcp_passthrough_url"
+  | "vision_redirect";
 
 export interface ProviderBatchPatchDraft {
   // Basic / existing
@@ -177,6 +178,7 @@ export interface ProviderBatchPatchDraft {
   // MCP
   mcp_passthrough_type?: ProviderPatchDraftInput<McpPassthroughType>;
   mcp_passthrough_url?: ProviderPatchDraftInput<string>;
+  vision_redirect?: ProviderPatchDraftInput<VisionRedirectConfig>;
 }
 
 export interface ProviderBatchPatch {
@@ -231,6 +233,7 @@ export interface ProviderBatchPatch {
   // MCP
   mcp_passthrough_type: ProviderPatchOperation<McpPassthroughType>;
   mcp_passthrough_url: ProviderPatchOperation<string>;
+  vision_redirect: ProviderPatchOperation<VisionRedirectConfig>;
 }
 
 export interface ProviderBatchApplyUpdates {
@@ -285,6 +288,7 @@ export interface ProviderBatchApplyUpdates {
   // MCP
   mcp_passthrough_type?: McpPassthroughType;
   mcp_passthrough_url?: string | null;
+  vision_redirect?: VisionRedirectConfig | null;
 }
 
 // Gemini (generateContent API) parameter overrides
@@ -295,6 +299,20 @@ export type GeminiGoogleSearchPreference = "inherit" | "enabled" | "disabled";
 
 // MCP 透传类型枚举
 export type McpPassthroughType = "none" | "minimax" | "glm" | "custom";
+
+/** Vision redirect configuration - redirect image content to a multimodal provider */
+export interface VisionRedirectConfig {
+  /** Master switch */
+  enabled: boolean;
+  /** Target multimodal provider ID (can reference self) */
+  targetProviderId: number;
+  /** Override model name for the vision call (required when targeting self) */
+  targetModel?: string;
+  /** Replacement markup format; "..." is the placeholder for description content */
+  descriptionFormat: string;
+  /** Multimodal call timeout in milliseconds */
+  timeoutMs: number;
+}
 
 export interface Provider {
   id: number;
@@ -345,6 +363,9 @@ export interface Provider {
   // 如果未配置，则自动从 provider.url 提取基础域名
   // 例如：https://api.minimaxi.com/anthropic -> https://api.minimaxi.com
   mcpPassthroughUrl: string | null;
+
+  /** Vision redirect configuration */
+  visionRedirect: VisionRedirectConfig | null;
 
   // 金额限流配置
   limit5hUsd: number | null;
@@ -450,6 +471,8 @@ export interface ProviderDisplay {
   mcpPassthroughType: McpPassthroughType;
   // MCP 透传 URL
   mcpPassthroughUrl: string | null;
+  /** Vision redirect configuration */
+  visionRedirect: VisionRedirectConfig | null;
   // 金额限流配置
   limit5hUsd: number | null;
   limitDailyUsd: number | null;
@@ -543,6 +566,7 @@ export interface CreateProviderData {
   blocked_clients?: string[] | null;
   mcp_passthrough_type?: McpPassthroughType;
   mcp_passthrough_url?: string | null;
+  vision_redirect?: VisionRedirectConfig | null;
 
   // 金额限流配置
   limit_5h_usd?: number | null;
@@ -623,6 +647,7 @@ export interface UpdateProviderData {
   blocked_clients?: string[] | null;
   mcp_passthrough_type?: McpPassthroughType;
   mcp_passthrough_url?: string | null;
+  vision_redirect?: VisionRedirectConfig | null;
 
   // 金额限流配置
   limit_5h_usd?: number | null;
