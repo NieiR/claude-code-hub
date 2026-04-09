@@ -66,6 +66,7 @@ import {
 } from "./errors";
 import { ModelRedirector } from "./model-redirector";
 import { ProxyProviderResolver } from "./provider-selector";
+import { VisionRedirector } from "./vision-redirector";
 import type { ProxySession } from "./session";
 import { setDeferredStreamingFinalization } from "./stream-finalization";
 import {
@@ -1848,6 +1849,14 @@ export class ProxyForwarder {
       const wasRedirected = ModelRedirector.apply(session, provider);
       if (wasRedirected) {
         logger.debug("ProxyForwarder: Model redirected", {
+          providerId: provider.id,
+        });
+      }
+
+      // Apply vision redirect (if configured)
+      const wasVisionRedirected = await VisionRedirector.apply(session, provider);
+      if (wasVisionRedirected) {
+        logger.debug("ProxyForwarder: Vision redirected", {
           providerId: provider.id,
         });
       }

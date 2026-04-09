@@ -113,8 +113,9 @@ describe("vision-redirector", () => {
       descriptions.set("0-1", "A cat sitting on a windowsill");
 
       const replaced = replaceImageBlocksWithDescriptions(messages, detections, descriptions, format);
-      expect(replaced[0].content[0]).toEqual({ type: "text", text: "What is this?" });
-      expect(replaced[0].content[1]).toEqual({
+      const content0 = replaced[0].content as Array<Record<string, unknown>>;
+      expect(content0[0]).toEqual({ type: "text", text: "What is this?" });
+      expect(content0[1]).toEqual({
         type: "text",
         text: "[Image Description] A cat sitting on a windowsill [/Image Description]",
       });
@@ -134,7 +135,8 @@ describe("vision-redirector", () => {
 
       const replaced = replaceImageBlocksWithDescriptions(messages, detections, descriptions, format);
       // Original block preserved
-      expect(replaced[0].content[0]).toEqual({
+      const content0 = replaced[0].content as Array<Record<string, unknown>>;
+      expect(content0[0]).toEqual({
         type: "image",
         source: { type: "base64", media_type: "image/png", data: "aaa" },
       });
@@ -155,12 +157,13 @@ describe("vision-redirector", () => {
       descriptions.set("0-0", "First image description"); // only first succeeded
 
       const replaced = replaceImageBlocksWithDescriptions(messages, detections, descriptions, format);
-      expect(replaced[0].content[0]).toEqual({
+      const content0 = replaced[0].content as Array<Record<string, unknown>>;
+      expect(content0[0]).toEqual({
         type: "text",
         text: "[Image Description] First image description [/Image Description]",
       });
       // Second block preserved as-is
-      expect(replaced[0].content[1]).toEqual({
+      expect(content0[1]).toEqual({
         type: "image_url",
         image_url: { url: "https://example.com/2.png" },
       });
@@ -181,7 +184,8 @@ describe("vision-redirector", () => {
 
       replaceImageBlocksWithDescriptions(originalMessages, detections, descriptions, format);
       // Original unchanged
-      expect(originalMessages[0].content[0]).toEqual({
+      const origContent = originalMessages[0].content as Array<Record<string, unknown>>;
+      expect(origContent[0]).toEqual({
         type: "image",
         source: { type: "base64", media_type: "image/png", data: "aaa" },
       });

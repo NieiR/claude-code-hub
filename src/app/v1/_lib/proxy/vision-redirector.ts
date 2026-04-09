@@ -61,7 +61,8 @@ export function replaceImageBlocksWithDescriptions(
 
     if (description !== undefined) {
       const text = format.replace("...", description);
-      result[detection.messageIndex].content[detection.blockIndex] = {
+      const msgContent = result[detection.messageIndex].content as Array<Record<string, unknown>>;
+      msgContent[detection.blockIndex] = {
         type: "text",
         text,
       };
