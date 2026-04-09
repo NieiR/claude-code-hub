@@ -13,7 +13,7 @@ import {
 import { normalizeAllowedModelRules } from "@/lib/allowed-model-rules";
 import { normalizeProviderModelRedirectRules } from "@/lib/provider-model-redirects";
 import { parseProviderGroups } from "@/lib/utils/provider-group";
-import type { ProviderDisplay, ProviderType } from "@/types/provider";
+import type { ProviderDisplay, ProviderType, VisionRedirectConfig } from "@/types/provider";
 import { analyzeBatchProviderSettings } from "../../batch-edit/analyze-batch-settings";
 import type {
   FormMode,
@@ -71,6 +71,11 @@ const ACTION_TO_FIELD_PATH: Partial<Record<ProviderFormAction["type"], string>> 
   SET_REQUEST_TIMEOUT_NON_STREAMING: "network.requestTimeoutNonStreamingSeconds",
   SET_MCP_PASSTHROUGH_TYPE: "mcp.mcpPassthroughType",
   SET_MCP_PASSTHROUGH_URL: "mcp.mcpPassthroughUrl",
+  SET_VISION_ENABLED: "vision.enabled",
+  SET_VISION_TARGET_PROVIDER_ID: "vision.targetProviderId",
+  SET_VISION_TARGET_MODEL: "vision.targetModel",
+  SET_VISION_DESCRIPTION_FORMAT: "vision.descriptionFormat",
+  SET_VISION_TIMEOUT_MS: "vision.timeoutMs",
 };
 
 // Initial state factory
@@ -271,6 +276,13 @@ export function createInitialState(
             ? analysis.mcp.mcpPassthroughUrl.value
             : "",
       },
+      vision: {
+        enabled: false,
+        targetProviderId: null,
+        targetModel: "",
+        descriptionFormat: "[Image Description] ... [/Image Description]",
+        timeoutMs: 30000,
+      },
       batch: { isEnabled: "no_change" },
       ui: {
         activeTab: "basic",
@@ -338,6 +350,13 @@ export function createInitialState(
       mcp: {
         mcpPassthroughType: "none",
         mcpPassthroughUrl: "",
+      },
+      vision: {
+        enabled: false,
+        targetProviderId: null,
+        targetModel: "",
+        descriptionFormat: "[Image Description] ... [/Image Description]",
+        timeoutMs: 30000,
       },
       batch: { isEnabled: "no_change" },
       ui: {
@@ -426,6 +445,13 @@ export function createInitialState(
     mcp: {
       mcpPassthroughType: sourceProvider?.mcpPassthroughType ?? "none",
       mcpPassthroughUrl: sourceProvider?.mcpPassthroughUrl ?? "",
+    },
+    vision: {
+      enabled: sourceProvider?.visionRedirect?.enabled ?? false,
+      targetProviderId: sourceProvider?.visionRedirect?.targetProviderId ?? null,
+      targetModel: sourceProvider?.visionRedirect?.targetModel ?? "",
+      descriptionFormat: sourceProvider?.visionRedirect?.descriptionFormat ?? "[Image Description] ... [/Image Description]",
+      timeoutMs: sourceProvider?.visionRedirect?.timeoutMs ?? 30000,
     },
     batch: { isEnabled: "no_change" },
     ui: {
@@ -659,6 +685,17 @@ export function providerFormReducer(
       return { ...state, mcp: { ...state.mcp, mcpPassthroughType: action.payload } };
     case "SET_MCP_PASSTHROUGH_URL":
       return { ...state, mcp: { ...state.mcp, mcpPassthroughUrl: action.payload } };
+    // Vision redirect
+    case "SET_VISION_ENABLED":
+      return { ...state, vision: { ...state.vision, enabled: action.payload } };
+    case "SET_VISION_TARGET_PROVIDER_ID":
+      return { ...state, vision: { ...state.vision, targetProviderId: action.payload } };
+    case "SET_VISION_TARGET_MODEL":
+      return { ...state, vision: { ...state.vision, targetModel: action.payload } };
+    case "SET_VISION_DESCRIPTION_FORMAT":
+      return { ...state, vision: { ...state.vision, descriptionFormat: action.payload } };
+    case "SET_VISION_TIMEOUT_MS":
+      return { ...state, vision: { ...state.vision, timeoutMs: action.payload } };
 
     // Batch
     case "SET_BATCH_IS_ENABLED":

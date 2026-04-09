@@ -346,6 +346,15 @@ function ProviderFormContent({
           request_timeout_non_streaming_ms: nonStreamingTimeoutMs,
           mcp_passthrough_type: state.mcp.mcpPassthroughType,
           mcp_passthrough_url: state.mcp.mcpPassthroughUrl?.trim() || null,
+          vision_redirect: state.vision.enabled
+            ? {
+                enabled: state.vision.enabled,
+                targetProviderId: state.vision.targetProviderId,
+                targetModel: state.vision.targetModel?.trim() || undefined,
+                descriptionFormat: state.vision.descriptionFormat?.trim() || "[Image Description] ... [/Image Description]",
+                timeoutMs: state.vision.timeoutMs,
+              }
+            : null,
           tpm: null,
           rpm: null,
           rpd: null,

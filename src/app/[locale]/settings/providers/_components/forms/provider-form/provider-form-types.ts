@@ -16,6 +16,7 @@ import type {
   ProviderDisplay,
   ProviderModelRedirectRule,
   ProviderType,
+  VisionRedirectConfig,
 } from "@/types/provider";
 import type { BatchSettingsAnalysis } from "../../batch-edit/analyze-batch-settings";
 
@@ -109,6 +110,14 @@ export interface McpState {
   mcpPassthroughUrl: string;
 }
 
+export interface VisionRedirectState {
+  enabled: boolean;
+  targetProviderId: number | null;
+  targetModel: string;
+  descriptionFormat: string;
+  timeoutMs: number;
+}
+
 export interface BatchState {
   isEnabled: "no_change" | "true" | "false";
 }
@@ -128,6 +137,7 @@ export interface ProviderFormState {
   circuitBreaker: CircuitBreakerState;
   network: NetworkState;
   mcp: McpState;
+  vision: VisionRedirectState;
   batch: BatchState;
   ui: UIState;
 }
@@ -194,6 +204,12 @@ export type ProviderFormAction =
   // MCP actions
   | { type: "SET_MCP_PASSTHROUGH_TYPE"; payload: McpPassthroughType }
   | { type: "SET_MCP_PASSTHROUGH_URL"; payload: string }
+  // Vision redirect actions
+  | { type: "SET_VISION_ENABLED"; payload: boolean }
+  | { type: "SET_VISION_TARGET_PROVIDER_ID"; payload: number | null }
+  | { type: "SET_VISION_TARGET_MODEL"; payload: string }
+  | { type: "SET_VISION_DESCRIPTION_FORMAT"; payload: string }
+  | { type: "SET_VISION_TIMEOUT_MS"; payload: number }
   // UI actions
   | { type: "SET_ACTIVE_TAB"; payload: TabId }
   | { type: "SET_ACTIVE_NAV"; payload: { tab: TabId; subTab: SubTabId | null } }
