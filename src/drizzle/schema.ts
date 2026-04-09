@@ -16,7 +16,7 @@ import {
 import { relations, sql } from 'drizzle-orm';
 import type { SpecialSetting } from '@/types/special-settings';
 import type { ResponseFixerConfig } from '@/types/system-config';
-import type { AllowedModelRuleInput, ProviderModelRedirectRule, ProviderType } from "@/types/provider";
+import type { AllowedModelRuleInput, ProviderModelRedirectRule, ProviderType, VisionRedirectConfig } from "@/types/provider";
 import type { FilterOperation } from "@/lib/request-filter-types";
 
 // Enums
@@ -236,6 +236,11 @@ export const providers = pgTable('providers', {
   // 如果未配置，则自动从 provider.url 提取基础域名
   // 例如：https://api.minimaxi.com/anthropic -> https://api.minimaxi.com
   mcpPassthroughUrl: varchar('mcp_passthrough_url', { length: 512 }),
+
+  // 视觉请求重定向：将图片内容重定向到多模态供应商处理
+  visionRedirect: jsonb('vision_redirect')
+    .$type<VisionRedirectConfig | null>()
+    .default(null),
 
   // 金额限流配置
   limit5hUsd: numeric('limit_5h_usd', { precision: 10, scale: 2 }),

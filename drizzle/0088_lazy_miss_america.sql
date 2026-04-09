@@ -1,0 +1,1 @@
+ALTER TABLE "providers" ADD COLUMN "vision_redirect" jsonb DEFAULT 'null'::jsonb;
