@@ -35,6 +35,27 @@
       "label": "模型重定向配置",
       "optional": "(可选)"
     },
+    "visionRedirect": {
+      "label": "视觉重定向",
+      "enabled": {
+        "label": "启用视觉重定向",
+        "desc": "将图片内容重定向到多模态供应商进行描述后再转发请求"
+      },
+      "targetProvider": {
+        "label": "目标供应商",
+        "placeholder": "输入供应商 ID"
+      },
+      "targetModel": {
+        "label": "覆写模型（可选）",
+        "placeholder": "例如 gpt-4o，留空使用请求模型"
+      },
+      "descriptionFormat": {
+        "label": "描述格式"
+      },
+      "timeout": {
+        "label": "超时时间 (ms)"
+      }
+    },
     "preserveClientIp": {
       "label": "透传客户端 IP",
       "desc": "向上游转发 x-forwarded-for / x-real-ip，可能暴露真实来源 IP",
@@ -48,11 +69,11 @@
       "title": "选项",
       "desc": "附加供应商选项和覆写设置"
     },
-  "modelWhitelist": {
-    "title": "模型白名单",
-    "desc": "限制此供应商可以处理的模型。默认情况下，供应商可以处理该类型下的所有模型。",
-    "legacyExactOnlyWarning": "这个旧版表单只会显示精确匹配的白名单规则。在这里保存会丢失前缀、后缀、关键词或正则规则，请改用新版供应商表单编辑高级规则。",
-    "label": "允许的模型",
+    "modelWhitelist": {
+      "title": "模型白名单",
+      "desc": "限制此供应商可以处理的模型。默认情况下，供应商可以处理该类型下的所有模型。",
+      "legacyExactOnlyWarning": "这个旧版表单只会显示精确匹配的白名单规则。在这里保存会丢失前缀、后缀、关键词或正则规则，请改用新版供应商表单编辑高级规则。",
+      "label": "允许的模型",
       "optional": "(可选)",
       "allowAll": "✓ 允许所有模型（推荐）",
       "selectedOnly": "仅允许命中这 {count} 条规则的模型。其他模型的请求不会调度到此供应商。",

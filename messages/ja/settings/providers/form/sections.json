@@ -156,8 +156,7 @@
       "none": "無制限",
       "total": "総: ${amount}",
       "weekly": "週: ${amount}"
-    },
-    "title": "レート制限"
+    }
   },
   "limits": {
     "timeBased": "時間ベースの制限",
@@ -299,11 +298,32 @@
       "label": "モデルリダイレクト設定",
       "optional": "（任意）"
     },
-  "modelWhitelist": {
-    "allowAll": "✓ すべてのモデルを許可（推奨）",
-    "desc": "このプロバイダーが処理できるモデルを制限します。既定では同タイプのすべてのモデルを処理できます。",
-    "legacyExactOnlyWarning": "この旧フォームでは完全一致の allowlist ルールしか表示できません。ここで保存すると prefix / suffix / keyword / regex ルールは失われます。高度なルールは新しいプロバイダーフォームで編集してください。",
-    "label": "許可するモデル",
+    "visionRedirect": {
+      "label": "ビジョンリダイレクト",
+      "enabled": {
+        "label": "ビジョンリダイレクトを有効にする",
+        "desc": "画像コンテンツをマルチモーダルプロバイダーにリダイレクトして説明を取得し、リクエストを転送します"
+      },
+      "targetProvider": {
+        "label": "ターゲットプロバイダー",
+        "placeholder": "プロバイダーIDを入力"
+      },
+      "targetModel": {
+        "label": "モデルを上書き（オプション）",
+        "placeholder": "例: gpt-4o、空の場合はリクエストモデルを使用"
+      },
+      "descriptionFormat": {
+        "label": "説明フォーマット"
+      },
+      "timeout": {
+        "label": "タイムアウト (ms)"
+      }
+    },
+    "modelWhitelist": {
+      "allowAll": "✓ すべてのモデルを許可（推奨）",
+      "desc": "このプロバイダーが処理できるモデルを制限します。既定では同タイプのすべてのモデルを処理できます。",
+      "legacyExactOnlyWarning": "この旧フォームでは完全一致の allowlist ルールしか表示できません。ここで保存すると prefix / suffix / keyword / regex ルールは失われます。高度なルールは新しいプロバイダーフォームで編集してください。",
+      "label": "許可するモデル",
       "moreModels": "+{count} 件 さらに表示",
       "optional": "（任意）",
       "selectedOnly": "設定済みの {count} 件のルールに一致したモデルのみ許可します。他のモデルはこのプロバイダーにルーティングされません。",
