@@ -60,7 +60,12 @@ import type { SystemSettings } from "@/types/system-config";
 
 import { GeminiAuth } from "../gemini/auth";
 import { GEMINI_PROTOCOL } from "../gemini/protocol";
-import { HeaderProcessor, resolveAnthropicAuthHeaders } from "../headers";
+import {
+  applyOpencodeSessionHeader,
+  HeaderProcessor,
+  OPENCODE_SESSION_HEADER,
+  resolveAnthropicAuthHeaders,
+} from "../headers";
 import {
   evaluateResponsesWsEligibility,
   getResponsesWsSessionId,
@@ -8953,6 +8958,16 @@ export class ProxyForwarder {
     if (session.getCacheTtlResolved && session.getCacheTtlResolved() === "1h") {
       overrides["anthropic-beta"] = mergeAnthropicCacheTtlBetaFlag(
         session.headers.get("anthropic-beta")
+      );
+    }
+
+    // OpenCode Zen 强制要求 x-opencode-session；客户端或 provider 自定义头已经带上时不覆盖。
+    // hedge/discovery 的影子会话会清空 sessionId，改用 upstreamSessionSeed 保持与父请求同一个值。
+    if (!session.headers.has(OPENCODE_SESSION_HEADER)) {
+      applyOpencodeSessionHeader(
+        overrides,
+        upstreamBaseUrl,
+        session.sessionId ?? session.upstreamSessionSeed
       );
     }
 
